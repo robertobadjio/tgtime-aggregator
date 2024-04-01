@@ -1,7 +1,7 @@
 package endpoints
 
 import (
-	"tgtime-aggregator/internal/time"
+	"tgtime-aggregator/internal/domain/time"
 )
 
 type CreateTimeRequest struct {

@@ -4,7 +4,7 @@ import (
 	"context"
 	grpctransport "github.com/go-kit/kit/transport/grpc"
 	aggregatorsvc "tgtime-aggregator/api/v1/pb/aggregator"
-	"tgtime-aggregator/internal/time"
+	"tgtime-aggregator/internal/domain/time"
 	"tgtime-aggregator/pkg/time/endpoints"
 )
 

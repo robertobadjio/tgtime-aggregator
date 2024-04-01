@@ -7,9 +7,9 @@ import (
 	"net/http"
 	"os"
 	"tgtime-aggregator/internal/db"
-	"tgtime-aggregator/internal/time"
-	"tgtime-aggregator/internal/time/implementation"
-	"tgtime-aggregator/internal/time/pg_db"
+	"tgtime-aggregator/internal/domain/time"
+	"tgtime-aggregator/internal/domain/time/implementation"
+	"tgtime-aggregator/internal/domain/time/pg_db"
 )
 
 type apiService struct {
@@ -28,7 +28,7 @@ func NewService() Service {
 
 func (s *apiService) CreateTime(ctx context.Context, t *time.TimeUser) (*time.TimeUser, error) {
 	repo := pg_db.NewPgRepository(db.GetDB())
-	timeService := implementation.NewService(repo, logger)
+	timeService := implementation.NewTimeService(repo, logger)
 	err := timeService.CreateTime(ctx, t)
 	if err != nil {
 		logger.Log("msg", err.Error())
