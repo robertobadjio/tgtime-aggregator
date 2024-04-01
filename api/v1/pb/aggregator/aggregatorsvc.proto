@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+option go_package = "./aggregatorsvc";
+
+service Aggregator {
+  rpc CreateTime (CreateTimeRequest) returns (CreateTimeResponse);
+}
+
+message CreateTimeRequest {
+  string macAddress = 1;
+  int64 seconds = 2;
+  int64 routerId = 3;
+}
+
+message CreateTimeResponse {
+  string macAddress = 1;
+  int64 seconds = 2;
+  int64 routerId = 3;
+}
