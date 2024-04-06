@@ -43,7 +43,7 @@ func (r *PgTimeRepository) GetByFilters(_ context.Context, query time2.Query) ([
 		cond = append(cond, fmt.Sprintf(`mac_address = "%s"`, query.MacAddress))
 	}
 	if query.RouterId != 0 {
-		cond = append(cond, fmt.Sprintf(`router_id = "%s"`, query.RouterId))
+		cond = append(cond, fmt.Sprintf(`router_id = "%d"`, query.RouterId))
 	}
 
 	rows, err := db.GetDB().Query(

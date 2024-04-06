@@ -23,7 +23,7 @@ func (otc *tgTimeClient) GetAllUsers() (*Users, error) {
 	}
 
 	users := Users{}
-	if err := otc.sendRequest(request, &users); err != nil {
+	if err = otc.sendRequest(request, &users); err != nil {
 		return nil, err
 	}
 

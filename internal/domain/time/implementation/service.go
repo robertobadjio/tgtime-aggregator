@@ -7,19 +7,19 @@ import (
 	"time"
 )
 
-type timeService struct {
+type TimeService struct {
 	repository time2.Repository
 	logger     log.Logger
 }
 
-func NewTimeService(rep time2.Repository, logger log.Logger) *timeService {
-	return &timeService{
+func NewTimeService(rep time2.Repository, logger log.Logger) *TimeService {
+	return &TimeService{
 		repository: rep,
 		logger:     logger,
 	}
 }
 
-func (s *timeService) CreateTime(ctx context.Context, t *time2.TimeUser) error {
+func (s *TimeService) CreateTime(ctx context.Context, t *time2.TimeUser) error {
 	if err := s.repository.CreateTime(ctx, t); err != nil {
 		s.logger.Log("msg", err.Error())
 		return err // TODO: !
@@ -28,7 +28,7 @@ func (s *timeService) CreateTime(ctx context.Context, t *time2.TimeUser) error {
 	return nil
 }
 
-func (s *timeService) GetByFilters(
+func (s *TimeService) GetByFilters(
 	ctx context.Context,
 	macAddress string,
 	date time.Time,
@@ -46,7 +46,7 @@ func (s *timeService) GetByFilters(
 	return users, nil
 }
 
-func (s *timeService) GetStartSecondDayByDate(
+func (s *TimeService) GetStartSecondDayByDate(
 	ctx context.Context,
 	macAddress string,
 	date time.Time,
@@ -64,7 +64,7 @@ func (s *timeService) GetStartSecondDayByDate(
 	return seconds, nil
 }
 
-func (s *timeService) GetEndSecondDayByDate(
+func (s *TimeService) GetEndSecondDayByDate(
 	ctx context.Context,
 	macAddress string,
 	date time.Time,
@@ -83,7 +83,7 @@ func (s *timeService) GetEndSecondDayByDate(
 }
 
 // AggregateDayTotalTime Подсчет общего количества секунд
-func (s *timeService) AggregateDayTotalTime(times []*time2.TimeUser) (int64, error) {
+func (s *TimeService) AggregateDayTotalTime(times []*time2.TimeUser) (int64, error) {
 	var sum int64
 	for i, t := range times {
 		if i == 0 {
@@ -99,7 +99,7 @@ func (s *timeService) AggregateDayTotalTime(times []*time2.TimeUser) (int64, err
 	return sum, nil
 }
 
-func (s *timeService) GetAllBreaksByTimesOld(times []*time2.TimeUser) ([]*time2.Break, error) {
+func (s *TimeService) GetAllBreaksByTimesOld(times []*time2.TimeUser) ([]*time2.Break, error) {
 	breaks := make([]*time2.Break, 0)
 	for i, t := range times {
 		if i == 0 {

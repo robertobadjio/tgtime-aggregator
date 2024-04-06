@@ -10,7 +10,7 @@ import (
 	"github.com/gorilla/mux"
 	"net/http"
 	"os"
-	"tgtime-aggregator/internal/util"
+	"tgtime-aggregator/internal/error_helper"
 	"tgtime-aggregator/pkg/time/endpoints"
 )
 
@@ -104,10 +104,10 @@ func encodeResponse(ctx context.Context, w http.ResponseWriter, response interfa
 func encodeError(_ context.Context, err error, w http.ResponseWriter) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 
-	var tiaErr *util.TimeInvalidArgument
+	var tiaErr *error_helper.TimeInvalidArgument
 
 	switch {
-	case errors.As(err, &tiaErr), errors.Is(err, util.ErrInvalidMacAddress):
+	case errors.As(err, &tiaErr), errors.Is(err, error_helper.ErrInvalidMacAddress):
 		w.WriteHeader(http.StatusBadRequest)
 	default:
 		w.WriteHeader(http.StatusInternalServerError)
