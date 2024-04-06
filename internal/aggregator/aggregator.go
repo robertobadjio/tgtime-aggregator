@@ -3,9 +3,9 @@ package aggregator
 import (
 	"context"
 	"encoding/json"
-	implementationT "tgtime-aggregator/internal/domain/time/implementation"
-	"tgtime-aggregator/internal/domain/time_summary"
-	"tgtime-aggregator/internal/tgtime_api_client"
+	implementationT "github.com/robertobadjio/tgtime-aggregator/internal/domain/time/implementation"
+	"github.com/robertobadjio/tgtime-aggregator/internal/domain/time_summary"
+	"github.com/robertobadjio/tgtime-aggregator/internal/tgtime_api_client"
 	"time"
 )
 

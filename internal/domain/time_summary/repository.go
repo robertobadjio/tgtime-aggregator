@@ -6,4 +6,5 @@ import (
 
 type Repository interface {
 	CreateTimeSummary(ctx context.Context, timeSummary *TimeSummary) error
+	GetTimeSummaryByDate(ctx context.Context, macAddress string, date string) (*TimeSummary, error)
 }

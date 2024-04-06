@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	_ "github.com/lib/pq"
-	"tgtime-aggregator/internal/config"
+	"github.com/robertobadjio/tgtime-aggregator/internal/config"
 )
 
 func GetDB() *sql.DB {

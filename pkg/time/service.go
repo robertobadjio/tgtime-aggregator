@@ -2,7 +2,7 @@ package time
 
 import (
 	"context"
-	"tgtime-aggregator/internal/domain/time"
+	"github.com/robertobadjio/tgtime-aggregator/internal/domain/time"
 )
 
 type Service interface {

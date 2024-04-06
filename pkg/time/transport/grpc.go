@@ -3,9 +3,9 @@ package transport
 import (
 	"context"
 	grpctransport "github.com/go-kit/kit/transport/grpc"
-	aggregatorsvc "tgtime-aggregator/api/v1/pb/aggregator"
-	"tgtime-aggregator/internal/domain/time"
-	"tgtime-aggregator/pkg/time/endpoints"
+	aggregatorsvc "github.com/robertobadjio/tgtime-aggregator/api/v1/pb/aggregator"
+	"github.com/robertobadjio/tgtime-aggregator/internal/domain/time"
+	"github.com/robertobadjio/tgtime-aggregator/pkg/time/endpoints"
 )
 
 type grpcServer struct {

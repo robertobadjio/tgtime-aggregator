@@ -3,7 +3,7 @@ package pg_db
 import (
 	"context"
 	"database/sql"
-	"tgtime-aggregator/internal/domain/time_summary"
+	"github.com/robertobadjio/tgtime-aggregator/internal/domain/time_summary"
 )
 
 type PgTimeSummaryRepository struct {
@@ -29,4 +29,30 @@ func (r *PgTimeSummaryRepository) CreateTimeSummary(_ context.Context, ts *time_
 	}
 
 	return nil
+}
+
+func (r *PgTimeSummaryRepository) GetTimeSummaryByDate(
+	_ context.Context,
+	macAddress string,
+	date string,
+) (*time_summary.TimeSummary, error) {
+	row := r.db.QueryRow(
+		"SELECT mac_address, seconds, breaks, date, seconds_start, seconds_end FROM time_summary WHERE mac_address = $1 AND date = $2",
+		macAddress,
+		date,
+	)
+	var timeSummary time_summary.TimeSummary
+	err := row.Scan(
+		&timeSummary.MacAddress,
+		&timeSummary.Seconds,
+		&timeSummary.BreaksJson,
+		&timeSummary.Date,
+		&timeSummary.SecondsStart,
+		&timeSummary.SecondsEnd,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return &timeSummary, nil
 }

@@ -4,9 +4,9 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"github.com/robertobadjio/tgtime-aggregator/internal/db"
+	time2 "github.com/robertobadjio/tgtime-aggregator/internal/domain/time"
 	"strings"
-	"tgtime-aggregator/internal/db"
-	time2 "tgtime-aggregator/internal/domain/time"
 )
 
 type PgTimeRepository struct {

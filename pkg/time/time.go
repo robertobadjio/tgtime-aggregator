@@ -4,12 +4,12 @@ import (
 	"context"
 	"fmt"
 	"github.com/go-kit/kit/log"
+	"github.com/robertobadjio/tgtime-aggregator/internal/db"
+	"github.com/robertobadjio/tgtime-aggregator/internal/domain/time"
+	"github.com/robertobadjio/tgtime-aggregator/internal/domain/time/implementation"
+	"github.com/robertobadjio/tgtime-aggregator/internal/domain/time/pg_db"
 	"net/http"
 	"os"
-	"tgtime-aggregator/internal/db"
-	"tgtime-aggregator/internal/domain/time"
-	"tgtime-aggregator/internal/domain/time/implementation"
-	"tgtime-aggregator/internal/domain/time/pg_db"
 )
 
 type apiService struct {

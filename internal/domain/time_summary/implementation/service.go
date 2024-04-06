@@ -3,7 +3,7 @@ package implementation
 import (
 	"context"
 	"github.com/go-kit/kit/log"
-	"tgtime-aggregator/internal/domain/time_summary"
+	"github.com/robertobadjio/tgtime-aggregator/internal/domain/time_summary"
 )
 
 type TimeSummaryService struct {

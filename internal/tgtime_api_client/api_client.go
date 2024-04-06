@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/robertobadjio/tgtime-aggregator/internal/config"
 	"net/http"
-	"tgtime-aggregator/internal/config"
 	"time"
 )
 

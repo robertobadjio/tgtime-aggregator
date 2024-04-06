@@ -3,7 +3,7 @@ package endpoints
 import (
 	"context"
 	"github.com/go-kit/kit/endpoint"
-	"tgtime-aggregator/pkg/time"
+	"github.com/robertobadjio/tgtime-aggregator/pkg/time"
 )
 
 type Set struct {

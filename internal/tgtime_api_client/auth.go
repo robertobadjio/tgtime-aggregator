@@ -2,9 +2,9 @@ package tgtime_api_client
 
 import (
 	"encoding/json"
+	"github.com/robertobadjio/tgtime-aggregator/internal/config"
 	"net/http"
 	"strings"
-	"tgtime-aggregator/internal/config"
 )
 
 type Tokens struct {

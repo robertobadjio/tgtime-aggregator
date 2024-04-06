@@ -3,7 +3,7 @@ package implementation
 import (
 	"context"
 	"github.com/go-kit/kit/log"
-	time2 "tgtime-aggregator/internal/domain/time"
+	time2 "github.com/robertobadjio/tgtime-aggregator/internal/domain/time"
 	"time"
 )
 

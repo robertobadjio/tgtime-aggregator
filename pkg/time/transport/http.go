@@ -8,10 +8,10 @@ import (
 	"github.com/go-kit/kit/log"
 	httptransport "github.com/go-kit/kit/transport/http"
 	"github.com/gorilla/mux"
+	"github.com/robertobadjio/tgtime-aggregator/internal/error_helper"
+	"github.com/robertobadjio/tgtime-aggregator/pkg/time/endpoints"
 	"net/http"
 	"os"
-	"tgtime-aggregator/internal/error_helper"
-	"tgtime-aggregator/pkg/time/endpoints"
 )
 
 type errorer interface {
