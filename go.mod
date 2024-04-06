@@ -1,4 +1,4 @@
-module tgtime-aggregator
+module github.com/robertobadjio/tgtime-aggregator
 
 go 1.22
 
