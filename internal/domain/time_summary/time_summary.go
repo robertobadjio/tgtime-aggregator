@@ -1,12 +1,10 @@
 package time_summary
 
-import "time"
-
 type TimeSummary struct {
-	MacAddress   string
-	Seconds      int64
-	BreaksJson   []byte
-	Date         time.Time
-	SecondsStart int64
-	SecondsEnd   int64
+	MacAddress   string `json:"mac_address"`
+	Seconds      int64  `json:"seconds"`
+	BreaksJson   []byte `json:"breaks_json"`
+	Date         string `json:"date"`
+	SecondsStart int64  `json:"seconds_start"`
+	SecondsEnd   int64  `json:"seconds_end"`
 }

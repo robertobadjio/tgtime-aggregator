@@ -8,6 +8,9 @@ import (
 	"github.com/robertobadjio/tgtime-aggregator/internal/domain/time"
 	"github.com/robertobadjio/tgtime-aggregator/internal/domain/time/implementation"
 	"github.com/robertobadjio/tgtime-aggregator/internal/domain/time/pg_db"
+	"github.com/robertobadjio/tgtime-aggregator/internal/domain/time_summary"
+	timeSummaryimplementation "github.com/robertobadjio/tgtime-aggregator/internal/domain/time_summary/implementation"
+	domainTimeSummary "github.com/robertobadjio/tgtime-aggregator/internal/domain/time_summary/pg_db"
 	"net/http"
 	"os"
 )
@@ -36,6 +39,22 @@ func (s *apiService) CreateTime(ctx context.Context, t *time.TimeUser) (*time.Ti
 	}
 
 	return t, nil
+}
+
+func (s *apiService) GetTimeSummaryByDate(
+	ctx context.Context,
+	macAddress string,
+	date string,
+) (*time_summary.TimeSummary, error) {
+	repo := domainTimeSummary.NewPgRepository(db.GetDB())
+	timeSummaryService := timeSummaryimplementation.NewTimeSummaryService(repo, logger)
+	ts, err := timeSummaryService.GetTimeSummaryByDate(ctx, macAddress, date)
+	if err != nil {
+		logger.Log("msg", err.Error())
+		return nil, fmt.Errorf("error getting time summary")
+	}
+
+	return ts, nil
 }
 
 func (s *apiService) ServiceStatus(_ context.Context) int {

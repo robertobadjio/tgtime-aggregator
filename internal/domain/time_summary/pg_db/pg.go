@@ -3,6 +3,8 @@ package pg_db
 import (
 	"context"
 	"database/sql"
+	"errors"
+	"fmt"
 	"github.com/robertobadjio/tgtime-aggregator/internal/domain/time_summary"
 )
 
@@ -36,23 +38,24 @@ func (r *PgTimeSummaryRepository) GetTimeSummaryByDate(
 	macAddress string,
 	date string,
 ) (*time_summary.TimeSummary, error) {
-	row := r.db.QueryRow(
-		"SELECT mac_address, seconds, breaks, date, seconds_start, seconds_end FROM time_summary WHERE mac_address = $1 AND date = $2",
+	ts := new(time_summary.TimeSummary)
+
+	if err := r.db.QueryRow(
+		"SELECT mac_address, seconds, breaks, date, seconds_begin, seconds_end FROM time_summary WHERE mac_address = $1 AND date = $2",
 		macAddress,
 		date,
-	)
-	var timeSummary time_summary.TimeSummary
-	err := row.Scan(
-		&timeSummary.MacAddress,
-		&timeSummary.Seconds,
-		&timeSummary.BreaksJson,
-		&timeSummary.Date,
-		&timeSummary.SecondsStart,
-		&timeSummary.SecondsEnd,
-	)
-	if err != nil {
-		return nil, err
+	).Scan(
+		&ts.MacAddress,
+		&ts.Seconds,
+		&ts.BreaksJson,
+		&ts.Date,
+		&ts.SecondsStart,
+		&ts.SecondsEnd,
+	); err == nil {
+		return ts, nil
+	} else if errors.Is(err, sql.ErrNoRows) {
+		return nil, nil
+	} else {
+		return nil, fmt.Errorf("error getting time summary from db: %v", err)
 	}
-
-	return &timeSummary, nil
 }

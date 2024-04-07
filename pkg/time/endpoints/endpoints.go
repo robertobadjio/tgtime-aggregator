@@ -8,12 +8,14 @@ import (
 
 type Set struct {
 	CreateTimeEndpoint    endpoint.Endpoint
+	GetTimeSummaryByDate  endpoint.Endpoint
 	ServiceStatusEndpoint endpoint.Endpoint
 }
 
 func NewEndpointSet(svc time.Service) Set {
 	return Set{
 		CreateTimeEndpoint:    MakeCreateTimeEndpoint(svc),
+		GetTimeSummaryByDate:  MakeGetTimeSummaryByDateEndpoint(svc),
 		ServiceStatusEndpoint: MakeServiceStatusEndpoint(svc),
 	}
 }
@@ -27,6 +29,19 @@ func MakeCreateTimeEndpoint(svc time.Service) endpoint.Endpoint {
 			return nil, err
 		}
 		return CreateTimeResponse{Time: t}, nil
+	}
+}
+
+func MakeGetTimeSummaryByDateEndpoint(svc time.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(GetTimeSummaryByDateRequest)
+
+		ts, err := svc.GetTimeSummaryByDate(ctx, req.MacAddress, req.Date)
+		if err != nil {
+			return GetTimeSummaryByDateResponse{TimeSummary: nil}, err
+		}
+
+		return GetTimeSummaryByDateResponse{TimeSummary: ts}, nil
 	}
 }
 

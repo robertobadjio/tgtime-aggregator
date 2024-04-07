@@ -55,7 +55,7 @@ func (agg Aggregator) AggregateTime(
 
 	return &time_summary.TimeSummary{
 		MacAddress:   user.MacAddress,
-		Date:         agg.date,
+		Date:         agg.date.Format("2006-01-02"),
 		Seconds:      seconds,
 		BreaksJson:   breaksJson,
 		SecondsStart: begin,
