@@ -5,6 +5,7 @@ option go_package = "./aggregatorsvc";
 service Aggregator {
   rpc CreateTime (CreateTimeRequest) returns (CreateTimeResponse);
   rpc GetTimeSummaryByDate (GetTimeSummaryByDateRequest) returns (GetTimeSummaryByDateResponse);
+  rpc GetTimeSummaryAllByDate (GetTimeSummaryAllByDateRequest) returns (GetTimeSummaryAllByDateResponse);
 }
 
 message CreateTimeRequest {
@@ -34,5 +35,13 @@ message GetTimeSummaryByDateRequest {
 }
 
 message GetTimeSummaryByDateResponse {
-    TimeSummary timeSummary = 1;
+  TimeSummary timeSummary = 1;
+}
+
+message GetTimeSummaryAllByDateRequest {
+  string date = 1;
+}
+
+message GetTimeSummaryAllByDateResponse {
+  repeated TimeSummary timeSummary = 1;
 }

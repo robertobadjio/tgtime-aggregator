@@ -57,6 +57,21 @@ func (s *apiService) GetTimeSummaryByDate(
 	return ts, nil
 }
 
+func (s *apiService) GetTimeSummaryAllByDate(
+	ctx context.Context,
+	date string,
+) ([]*time_summary.TimeSummary, error) {
+	repo := domainTimeSummary.NewPgRepository(db.GetDB())
+	timeSummaryService := timeSummaryimplementation.NewTimeSummaryService(repo, logger)
+	ts, err := timeSummaryService.GetTimeSummaryAllByDate(ctx, date)
+	if err != nil {
+		logger.Log("msg", err.Error())
+		return nil, fmt.Errorf("error getting time summary")
+	}
+
+	return ts, nil
+}
+
 func (s *apiService) ServiceStatus(_ context.Context) int {
 	logger.Log("msg", "Checking the Service health...")
 	return http.StatusOK

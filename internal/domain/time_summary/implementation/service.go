@@ -45,3 +45,16 @@ func (s *TimeSummaryService) GetTimeSummaryByDate(
 
 	return ts, nil
 }
+
+func (s *TimeSummaryService) GetTimeSummaryAllByDate(
+	ctx context.Context,
+	date string,
+) ([]*time_summary.TimeSummary, error) {
+	ts, err := s.repository.GetTimeSummaryAllByDate(ctx, date)
+	if err != nil {
+		s.logger.Log("msg", err.Error())
+		return nil, err
+	}
+
+	return ts, nil
+}

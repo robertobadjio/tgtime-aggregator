@@ -3,7 +3,6 @@ package transport
 import (
 	"context"
 	"errors"
-	"fmt"
 	grpctransport "github.com/go-kit/kit/transport/grpc"
 	aggregatorsvc "github.com/robertobadjio/tgtime-aggregator/api/v1/pb/aggregator"
 	"github.com/robertobadjio/tgtime-aggregator/internal/domain/time"
@@ -11,8 +10,9 @@ import (
 )
 
 type grpcServer struct {
-	createTime           grpctransport.Handler
-	getTimeSummaryByDate grpctransport.Handler
+	createTime              grpctransport.Handler
+	getTimeSummaryByDate    grpctransport.Handler
+	getTimeSummaryAllByDate grpctransport.Handler
 	aggregatorsvc.UnimplementedAggregatorServer
 }
 
@@ -27,6 +27,11 @@ func NewGRPCServer(ep endpoints.Set) aggregatorsvc.AggregatorServer {
 			ep.GetTimeSummaryByDate,
 			decodeGRPCGetTimeSummaryByDateRequest,
 			encodeGRPCGetTimeSummaryByDateResponse,
+		),
+		getTimeSummaryAllByDate: grpctransport.NewServer(
+			ep.GetTimeSummaryAllByDate,
+			decodeGRPCGetTimeSummaryAllByDateRequest,
+			encodeGRPCGetTimeSummaryAllByDateResponse,
 		),
 	}
 }
@@ -53,6 +58,17 @@ func (g *grpcServer) GetTimeSummaryByDate(
 	return resp.(*aggregatorsvc.GetTimeSummaryByDateResponse), nil
 }
 
+func (g *grpcServer) GetTimeSummaryAllByDate(
+	ctx context.Context,
+	r *aggregatorsvc.GetTimeSummaryAllByDateRequest,
+) (*aggregatorsvc.GetTimeSummaryAllByDateResponse, error) {
+	_, resp, err := g.getTimeSummaryAllByDate.ServeGRPC(ctx, r)
+	if err != nil {
+		return nil, err
+	}
+	return resp.(*aggregatorsvc.GetTimeSummaryAllByDateResponse), nil
+}
+
 func decodeGRPCCreateTimeRequest(_ context.Context, grpcReq interface{}) (interface{}, error) {
 	req := grpcReq.(*aggregatorsvc.CreateTimeRequest)
 	t := time.TimeUser{MacAddress: req.MacAddress, Seconds: req.Seconds, RouterId: int8(req.RouterId)}
@@ -72,7 +88,7 @@ func encodeGRPCCreateTimeResponse(_ context.Context, response interface{}) (inte
 
 func decodeGRPCGetTimeSummaryByDateRequest(_ context.Context, grpcReq interface{}) (interface{}, error) {
 	req := grpcReq.(*aggregatorsvc.GetTimeSummaryByDateRequest)
-	fmt.Println(req.MacAddress, req.Date)
+
 	return endpoints.GetTimeSummaryByDateRequest{MacAddress: req.MacAddress, Date: req.Date}, nil
 }
 
@@ -93,4 +109,32 @@ func encodeGRPCGetTimeSummaryByDateResponse(_ context.Context, response interfac
 	}
 
 	return &aggregatorsvc.GetTimeSummaryByDateResponse{TimeSummary: &ts}, nil
+}
+
+func decodeGRPCGetTimeSummaryAllByDateRequest(_ context.Context, grpcReq interface{}) (interface{}, error) {
+	req := grpcReq.(*aggregatorsvc.GetTimeSummaryAllByDateRequest)
+
+	return endpoints.GetTimeSummaryAllByDateRequest{Date: req.Date}, nil
+}
+
+func encodeGRPCGetTimeSummaryAllByDateResponse(_ context.Context, response interface{}) (interface{}, error) {
+	res, ok := response.(endpoints.GetTimeSummaryAllByDateResponse)
+
+	if !ok {
+		return nil, errors.New("invalid response body")
+	}
+
+	tsList := make([]*aggregatorsvc.TimeSummary, 0, len(res.Data)) // TODO: Неэффективная инициализация среза #21
+	for _, ts := range res.Data {
+		tsList = append(tsList, &aggregatorsvc.TimeSummary{
+			MacAddress:   ts.MacAddress,
+			Seconds:      ts.Seconds,
+			BreaksJson:   string(ts.BreaksJson),
+			Date:         ts.Date,
+			SecondsStart: ts.SecondsStart,
+			SecondsEnd:   ts.SecondsEnd,
+		})
+	}
+
+	return &aggregatorsvc.GetTimeSummaryAllByDateResponse{TimeSummary: tsList}, nil
 }

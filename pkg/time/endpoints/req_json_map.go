@@ -20,6 +20,13 @@ type GetTimeSummaryByDateResponse struct {
 	TimeSummary *time_summary.TimeSummary `json:"time_summary"`
 }
 
+type GetTimeSummaryAllByDateRequest struct {
+	Date string `json:"date"`
+}
+type GetTimeSummaryAllByDateResponse struct {
+	Data []*time_summary.TimeSummary `json:"time_summary"`
+}
+
 type ServiceStatusRequest struct{}
 type ServiceStatusResponse struct {
 	Code int `json:"status"`

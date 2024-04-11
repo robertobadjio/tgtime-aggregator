@@ -9,5 +9,6 @@ import (
 type Service interface {
 	CreateTime(ctx context.Context, time *time.TimeUser) (*time.TimeUser, error)
 	GetTimeSummaryByDate(ctx context.Context, macAddress string, date string) (*time_summary.TimeSummary, error)
+	GetTimeSummaryAllByDate(ctx context.Context, date string) ([]*time_summary.TimeSummary, error)
 	ServiceStatus(ctx context.Context) int
 }

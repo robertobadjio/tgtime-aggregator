@@ -19,8 +19,9 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	Aggregator_CreateTime_FullMethodName           = "/Aggregator/CreateTime"
-	Aggregator_GetTimeSummaryByDate_FullMethodName = "/Aggregator/GetTimeSummaryByDate"
+	Aggregator_CreateTime_FullMethodName              = "/Aggregator/CreateTime"
+	Aggregator_GetTimeSummaryByDate_FullMethodName    = "/Aggregator/GetTimeSummaryByDate"
+	Aggregator_GetTimeSummaryAllByDate_FullMethodName = "/Aggregator/GetTimeSummaryAllByDate"
 )
 
 // AggregatorClient is the client API for Aggregator service.
@@ -29,6 +30,7 @@ const (
 type AggregatorClient interface {
 	CreateTime(ctx context.Context, in *CreateTimeRequest, opts ...grpc.CallOption) (*CreateTimeResponse, error)
 	GetTimeSummaryByDate(ctx context.Context, in *GetTimeSummaryByDateRequest, opts ...grpc.CallOption) (*GetTimeSummaryByDateResponse, error)
+	GetTimeSummaryAllByDate(ctx context.Context, in *GetTimeSummaryAllByDateRequest, opts ...grpc.CallOption) (*GetTimeSummaryAllByDateResponse, error)
 }
 
 type aggregatorClient struct {
@@ -57,12 +59,22 @@ func (c *aggregatorClient) GetTimeSummaryByDate(ctx context.Context, in *GetTime
 	return out, nil
 }
 
+func (c *aggregatorClient) GetTimeSummaryAllByDate(ctx context.Context, in *GetTimeSummaryAllByDateRequest, opts ...grpc.CallOption) (*GetTimeSummaryAllByDateResponse, error) {
+	out := new(GetTimeSummaryAllByDateResponse)
+	err := c.cc.Invoke(ctx, Aggregator_GetTimeSummaryAllByDate_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AggregatorServer is the server API for Aggregator service.
 // All implementations must embed UnimplementedAggregatorServer
 // for forward compatibility
 type AggregatorServer interface {
 	CreateTime(context.Context, *CreateTimeRequest) (*CreateTimeResponse, error)
 	GetTimeSummaryByDate(context.Context, *GetTimeSummaryByDateRequest) (*GetTimeSummaryByDateResponse, error)
+	GetTimeSummaryAllByDate(context.Context, *GetTimeSummaryAllByDateRequest) (*GetTimeSummaryAllByDateResponse, error)
 	mustEmbedUnimplementedAggregatorServer()
 }
 
@@ -75,6 +87,9 @@ func (UnimplementedAggregatorServer) CreateTime(context.Context, *CreateTimeRequ
 }
 func (UnimplementedAggregatorServer) GetTimeSummaryByDate(context.Context, *GetTimeSummaryByDateRequest) (*GetTimeSummaryByDateResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetTimeSummaryByDate not implemented")
+}
+func (UnimplementedAggregatorServer) GetTimeSummaryAllByDate(context.Context, *GetTimeSummaryAllByDateRequest) (*GetTimeSummaryAllByDateResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTimeSummaryAllByDate not implemented")
 }
 func (UnimplementedAggregatorServer) mustEmbedUnimplementedAggregatorServer() {}
 
@@ -125,6 +140,24 @@ func _Aggregator_GetTimeSummaryByDate_Handler(srv interface{}, ctx context.Conte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Aggregator_GetTimeSummaryAllByDate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetTimeSummaryAllByDateRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AggregatorServer).GetTimeSummaryAllByDate(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Aggregator_GetTimeSummaryAllByDate_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AggregatorServer).GetTimeSummaryAllByDate(ctx, req.(*GetTimeSummaryAllByDateRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Aggregator_ServiceDesc is the grpc.ServiceDesc for Aggregator service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -139,6 +172,10 @@ var Aggregator_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetTimeSummaryByDate",
 			Handler:    _Aggregator_GetTimeSummaryByDate_Handler,
+		},
+		{
+			MethodName: "GetTimeSummaryAllByDate",
+			Handler:    _Aggregator_GetTimeSummaryAllByDate_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

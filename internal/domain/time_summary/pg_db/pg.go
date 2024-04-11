@@ -59,3 +59,36 @@ func (r *PgTimeSummaryRepository) GetTimeSummaryByDate(
 		return nil, fmt.Errorf("error getting time summary from db: %v", err)
 	}
 }
+
+func (r *PgTimeSummaryRepository) GetTimeSummaryAllByDate(
+	_ context.Context,
+	date string,
+) ([]*time_summary.TimeSummary, error) {
+	rows, err := r.db.Query(
+		"SELECT mac_address, seconds, breaks, date, seconds_begin, seconds_end FROM time_summary WHERE date = $1",
+		date)
+	if err != nil {
+		return nil, fmt.Errorf("error getting time summary: %v", err)
+	}
+	defer rows.Close()
+
+	var res []*time_summary.TimeSummary
+	for rows.Next() {
+		var ts time_summary.TimeSummary
+		err = rows.Scan(
+			&ts.MacAddress,
+			&ts.Seconds,
+			&ts.BreaksJson,
+			&ts.Date,
+			&ts.SecondsStart,
+			&ts.SecondsEnd,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("error scan time summary: %v", err)
+		}
+
+		res = append(res, &ts)
+	}
+
+	return res, nil
+}
