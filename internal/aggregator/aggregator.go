@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	implementationT "github.com/robertobadjio/tgtime-aggregator/internal/domain/time/implementation"
 	"github.com/robertobadjio/tgtime-aggregator/internal/domain/time_summary"
-	"github.com/robertobadjio/tgtime-aggregator/internal/tgtime_api_client"
 	"time"
 )
 
@@ -26,9 +25,9 @@ func NewAggregator(
 
 func (agg Aggregator) AggregateTime(
 	ctx context.Context,
-	user tgtime_api_client.User,
+	macAddress string,
 ) (*time_summary.TimeSummary, error) {
-	times, err := agg.timeService.GetByFilters(ctx, user.MacAddress, agg.date, 0)
+	times, err := agg.timeService.GetByFilters(ctx, macAddress, agg.date, 0)
 	if err != nil {
 		return nil, err
 	}
@@ -44,17 +43,17 @@ func (agg Aggregator) AggregateTime(
 	if err != nil {
 		return nil, err
 	}
-	begin, err := agg.timeService.GetStartSecondDayByDate(ctx, user.MacAddress, agg.date)
+	begin, err := agg.timeService.GetStartSecondDayByDate(ctx, macAddress, agg.date)
 	if err != nil {
 		return nil, err
 	}
-	end, err := agg.timeService.GetEndSecondDayByDate(ctx, user.MacAddress, agg.date)
+	end, err := agg.timeService.GetEndSecondDayByDate(ctx, macAddress, agg.date)
 	if err != nil {
 		return nil, err
 	}
 
 	return &time_summary.TimeSummary{
-		MacAddress:   user.MacAddress,
+		MacAddress:   macAddress,
 		Date:         agg.date.Format("2006-01-02"),
 		Seconds:      seconds,
 		BreaksJson:   breaksJson,

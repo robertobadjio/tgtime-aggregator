@@ -123,6 +123,19 @@ func (s *TimeService) GetAllBreaksByTimesOld(times []*time2.TimeUser) ([]*time2.
 	return breaks, nil
 }
 
+func (s *TimeService) GetMacAddresses(ctx context.Context, date time.Time) ([]string, error) {
+	secondsStart := getSecondsByBeginDate(date.Format("2006-01-02"))
+	secondsEnd := getSecondsByEndDate(date.Format("2006-01-02"))
+	q := time2.Query{SecondsStart: secondsStart, SecondsEnd: secondsEnd}
+	macAddresses, err := s.repository.GetMacAddresses(ctx, q)
+	if err != nil {
+		s.logger.Log("msg", err.Error())
+		return []string{}, err
+	}
+
+	return macAddresses, nil
+}
+
 func getSecondsByBeginDate(date string) int64 {
 	moscowLocation, _ := time.LoadLocation("Europe/Moscow")
 	t, _ := time.ParseInLocation("2006-01-02", date, moscowLocation)

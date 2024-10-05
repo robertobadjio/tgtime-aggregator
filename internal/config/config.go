@@ -19,9 +19,11 @@ type Config struct {
 	ApiURL            string
 	ApiMasterEmail    string
 	ApiMasterPassword string
+	KafkaHost         string
+	KafkaPort         string
 }
 
-const projectDirName = "tg-time-aggregator"
+const projectDirName = "tgtime-aggregator"
 
 func init() {
 	loadEnv()
@@ -40,6 +42,8 @@ func New() *Config {
 		ApiURL:            getEnv("API_URL", ""),
 		ApiMasterEmail:    getEnv("API_MASTER_EMAIL", ""),
 		ApiMasterPassword: getEnv("API_MASTER_PASSWORD", ""),
+		KafkaHost:         getEnv("KAFKA_HOST", ""),
+		KafkaPort:         getEnv("KAFKA_PORT", ""),
 	}
 }
 

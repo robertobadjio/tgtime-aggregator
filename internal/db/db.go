@@ -5,6 +5,7 @@ import (
 	"fmt"
 	_ "github.com/lib/pq"
 	"github.com/robertobadjio/tgtime-aggregator/internal/config"
+	"time"
 )
 
 func GetDB() *sql.DB {
@@ -20,10 +21,13 @@ func GetDB() *sql.DB {
 	)
 
 	db, err := sql.Open("postgres", pgConString)
-
 	if err != nil {
 		panic(err)
 	}
+
+	db.SetMaxOpenConns(25)
+	db.SetMaxIdleConns(25)
+	db.SetConnMaxLifetime(time.Minute)
 
 	if err = db.Ping(); err != nil {
 		panic(err)

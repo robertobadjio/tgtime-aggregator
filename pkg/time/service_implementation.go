@@ -22,7 +22,6 @@ var logger log.Logger
 
 func init() {
 	logger = log.NewLogfmtLogger(log.NewSyncWriter(os.Stderr))
-	logger = log.With(logger, "ts", log.DefaultTimestampUTC)
 }
 
 func NewService() Service {
@@ -34,38 +33,22 @@ func (s *apiService) CreateTime(ctx context.Context, t *time.TimeUser) (*time.Ti
 	timeService := implementation.NewTimeService(repo, logger)
 	err := timeService.CreateTime(ctx, t)
 	if err != nil {
-		logger.Log("msg", err.Error())
+		_ = logger.Log("msg", err.Error())
 		return nil, fmt.Errorf("error saving time")
 	}
 
 	return t, nil
 }
 
-func (s *apiService) GetTimeSummaryByDate(
+func (s *apiService) GetTimeSummary(
 	ctx context.Context,
-	macAddress string,
-	date string,
-) (*time_summary.TimeSummary, error) {
-	repo := domainTimeSummary.NewPgRepository(db.GetDB())
-	timeSummaryService := timeSummaryimplementation.NewTimeSummaryService(repo, logger)
-	ts, err := timeSummaryService.GetTimeSummaryByDate(ctx, macAddress, date)
-	if err != nil {
-		logger.Log("msg", err.Error())
-		return nil, fmt.Errorf("error getting time summary")
-	}
-
-	return ts, nil
-}
-
-func (s *apiService) GetTimeSummaryAllByDate(
-	ctx context.Context,
-	date string,
+	filters []*time_summary.Filter,
 ) ([]*time_summary.TimeSummary, error) {
 	repo := domainTimeSummary.NewPgRepository(db.GetDB())
 	timeSummaryService := timeSummaryimplementation.NewTimeSummaryService(repo, logger)
-	ts, err := timeSummaryService.GetTimeSummaryAllByDate(ctx, date)
+	ts, err := timeSummaryService.GetTimeSummary(ctx, filters)
 	if err != nil {
-		logger.Log("msg", err.Error())
+		_ = logger.Log("msg", err.Error())
 		return nil, fmt.Errorf("error getting time summary")
 	}
 
@@ -73,6 +56,6 @@ func (s *apiService) GetTimeSummaryAllByDate(
 }
 
 func (s *apiService) ServiceStatus(_ context.Context) int {
-	logger.Log("msg", "Checking the Service health...")
+	_ = logger.Log("msg", "Checking the Service health...")
 	return http.StatusOK
 }

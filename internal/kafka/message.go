@@ -1,15 +1,13 @@
-package time_summary
+package kafka
 
-type TimeSummary struct {
+type PreviousDayInfoMessage struct {
 	MacAddress   string `json:"mac_address"`
 	Seconds      int64  `json:"seconds"`
-	BreaksJson   []byte `json:"breaks_json"`
+	BreaksJson   []byte `json:"breaks"`
 	Date         string `json:"date"`
 	SecondsStart int64  `json:"seconds_start"`
 	SecondsEnd   int64  `json:"seconds_end"`
 }
 
-type Filter struct {
-	Key   string `json:"key"`
-	Value string `json:"value"`
-}
+const PreviousDayInfoTopic = "previous-day-info"
+const partition = 0

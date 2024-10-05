@@ -7,18 +7,16 @@ import (
 )
 
 type Set struct {
-	CreateTimeEndpoint      endpoint.Endpoint
-	GetTimeSummaryByDate    endpoint.Endpoint
-	GetTimeSummaryAllByDate endpoint.Endpoint
-	ServiceStatusEndpoint   endpoint.Endpoint
+	CreateTimeEndpoint    endpoint.Endpoint
+	GetTimeSummary        endpoint.Endpoint
+	ServiceStatusEndpoint endpoint.Endpoint
 }
 
 func NewEndpointSet(svc time.Service) Set {
 	return Set{
-		CreateTimeEndpoint:      MakeCreateTimeEndpoint(svc),
-		GetTimeSummaryByDate:    MakeGetTimeSummaryByDateEndpoint(svc),
-		GetTimeSummaryAllByDate: MakeGetTimeSummaryAllByDateEndpoint(svc),
-		ServiceStatusEndpoint:   MakeServiceStatusEndpoint(svc),
+		CreateTimeEndpoint:    MakeCreateTimeEndpoint(svc),
+		GetTimeSummary:        MakeGetTimeSummaryEndpoint(svc),
+		ServiceStatusEndpoint: MakeServiceStatusEndpoint(svc),
 	}
 }
 
@@ -34,29 +32,16 @@ func MakeCreateTimeEndpoint(svc time.Service) endpoint.Endpoint {
 	}
 }
 
-func MakeGetTimeSummaryByDateEndpoint(svc time.Service) endpoint.Endpoint {
+func MakeGetTimeSummaryEndpoint(svc time.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(GetTimeSummaryByDateRequest)
+		req := request.(GetTimeSummaryRequest)
 
-		ts, err := svc.GetTimeSummaryByDate(ctx, req.MacAddress, req.Date)
+		ts, err := svc.GetTimeSummary(ctx, req.Filters)
 		if err != nil {
-			return GetTimeSummaryByDateResponse{TimeSummary: nil}, err
+			return GetTimeSummaryResponse{TimeSummary: nil}, err
 		}
 
-		return GetTimeSummaryByDateResponse{TimeSummary: ts}, nil
-	}
-}
-
-func MakeGetTimeSummaryAllByDateEndpoint(svc time.Service) endpoint.Endpoint {
-	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(GetTimeSummaryAllByDateRequest)
-
-		ts, err := svc.GetTimeSummaryAllByDate(ctx, req.Date)
-		if err != nil {
-			return GetTimeSummaryAllByDateResponse{Data: nil}, err
-		}
-
-		return GetTimeSummaryAllByDateResponse{Data: ts}, nil
+		return GetTimeSummaryResponse{TimeSummary: ts}, nil
 	}
 }
 

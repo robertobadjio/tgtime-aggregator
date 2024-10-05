@@ -1,32 +1,26 @@
 services:
-  app-aggregator:
+  tgtime-aggregator:
     depends_on:
-      tgtime-api:
-        condition: service_healthy
       db:
         condition: service_healthy
     links:
       - db
-  tgtime-api:
     build:
-      context: .
-      dockerfile: ./docker/tgtime_api/Dockerfile
+      context: tgtime-aggregator
+      dockerfile: ./docker/app/Dockerfile
+    container_name: tgtime-aggregator
     ports:
-      - "1080:1080"
-    environment:
-      MOCKSERVER_INITIALIZATION_JSON_PATH: /config/initializerJson.json
-      MOCKSERVER_LOG_LEVEL: INFO
-      MOCKSERVER_PROPERTY_FILE: /config/mockserver.properties
-    volumes:
-      - ./docker/tgtime_api/config:/config
-      - ./docker/tgtime_api/config/mockserver.properties:/config/mockserver.properties
+      - "${HTTP_PORT:-8081}:8081"
+      - "${GRPC_PORT:-8082}:8082"
     networks:
       - tgtime-aggregator-network
+      - test-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:1080/liveness/probe"]
+      test: ["CMD", "curl", "-f", "http://localhost:8081/service/status"]
       interval: 10s
       timeout: 10s
       retries: 5
+      start_period: 1s
   db:
     image: postgres:16.2
     container_name: tgtime-aggregator-db
@@ -54,7 +48,7 @@ services:
     networks:
       - tgtime-aggregator-network
     volumes:
-      - ./db/migrations:/migrations
+      - ./tgtime-aggregator/db/migrations:/migrations
     command: ["-path", "/migrations", "-database", "postgres://${DATABASE_USER}:${DATABASE_PASSWORD}@database:${DATABASE_PORT}/${DATABASE_NAME}?sslmode=${DATABASE_SSL_MODE}", "up"]
     links:
       - db
@@ -64,3 +58,7 @@ services:
 
 volumes:
   tgtime-aggregator-data:
+
+networks:
+  tgtime-aggregator-network:
+    driver: bridge

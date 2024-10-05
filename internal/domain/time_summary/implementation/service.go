@@ -33,24 +33,11 @@ func (s *TimeSummaryService) CreateTimeSummary(
 	return nil
 }
 
-func (s *TimeSummaryService) GetTimeSummaryByDate(
+func (s *TimeSummaryService) GetTimeSummary(
 	ctx context.Context,
-	macAddress, date string,
-) (*time_summary.TimeSummary, error) {
-	ts, err := s.repository.GetTimeSummaryByDate(ctx, macAddress, date)
-	if err != nil {
-		s.logger.Log("msg", err.Error())
-		return nil, err
-	}
-
-	return ts, nil
-}
-
-func (s *TimeSummaryService) GetTimeSummaryAllByDate(
-	ctx context.Context,
-	date string,
+	filters []*time_summary.Filter,
 ) ([]*time_summary.TimeSummary, error) {
-	ts, err := s.repository.GetTimeSummaryAllByDate(ctx, date)
+	ts, err := s.repository.GetTimeSummary(ctx, filters)
 	if err != nil {
 		s.logger.Log("msg", err.Error())
 		return nil, err

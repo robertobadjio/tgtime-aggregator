@@ -20,4 +20,5 @@ type Service interface {
 	) (int64, error)
 	AggregateDayTotalTime(times []*TimeUser) (int64, error)
 	GetAllBreaksByTimesOld(times []*TimeUser) ([]*Break, error)
+	GetMacAddresses(ctx context.Context) ([]string, error)
 }

@@ -12,19 +12,11 @@ type CreateTimeResponse struct {
 	Time *time.TimeUser `json:"time"`
 }
 
-type GetTimeSummaryByDateRequest struct {
-	MacAddress string `json:"mac_address"`
-	Date       string `json:"date"`
+type GetTimeSummaryRequest struct {
+	Filters []*time_summary.Filter `json:"filters"`
 }
-type GetTimeSummaryByDateResponse struct {
-	TimeSummary *time_summary.TimeSummary `json:"time_summary"`
-}
-
-type GetTimeSummaryAllByDateRequest struct {
-	Date string `json:"date"`
-}
-type GetTimeSummaryAllByDateResponse struct {
-	Data []*time_summary.TimeSummary `json:"time_summary"`
+type GetTimeSummaryResponse struct {
+	TimeSummary []*time_summary.TimeSummary `json:"time_summary"`
 }
 
 type ServiceStatusRequest struct{}
