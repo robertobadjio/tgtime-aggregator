@@ -15,7 +15,44 @@ services:
       timeout: 10s
       retries: 5
       start_period: 1s
+  db:
+    image: postgres:16.2
+    container_name: tgtime-aggregator-db
+    restart: always
+    ports:
+      - "${DATABASE_PORT:-5432}:5432"
+    volumes:
+      - tgtime-aggregator-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: ${DATABASE_NAME}
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+    networks:
+      tgtime-aggregator-network:
+        aliases:
+          - database
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 1s
+  migrate:
+    image: migrate/migrate
+    networks:
+      - tgtime-aggregator-network
+    volumes:
+      - ./db/migrations:/migrations
+    command: ["-path", "/migrations", "-database", "postgres://${DATABASE_USER}:${DATABASE_PASSWORD}@database:${DATABASE_PORT}/${DATABASE_NAME}?sslmode=${DATABASE_SSL_MODE}", "up"]
+    links:
+      - db
+    depends_on:
+      db:
+        condition: service_healthy
 
 networks:
   tgtime-aggregator-network:
     driver: bridge
+
+volumes:
+  tgtime-aggregator-data:
