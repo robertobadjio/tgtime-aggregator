@@ -28,6 +28,19 @@ jobs:
               run: |
                 touch ./.env
                 echo ENV="dev" >> .env
+                echo HTTP_PORT="8081" >> .env
+                echo GRPC_PORT="8082" >> .env
+                echo DATABASE_HOST="db" >> .env
+                echo DATABASE_PORT="5432" >> .env
+                echo DATABASE_NAME="tgtime_aggregator" >> .env
+                echo DATABASE_USER="tgtime" >> .env
+                echo DATABASE_PASSWORD="tgtime" >> .env
+                echo DATABASE_SSL_MODE="disable" >> .env
+                echo API_URL="http://tgtime-api:1080"  >> .env
+                echo API_MASTER_EMAIL="robert@tgtime.ru" >> .env
+                echo API_MASTER_PASSWORD="password" >> .env
+                echo KAFKA_HOST="kafka" >> .env
+                echo KAFKA_PORT='9092" >> .env
 
             - name: Build containers
               run: docker compose -f docker-compose.yml -f docker-compose.dev.yml build
