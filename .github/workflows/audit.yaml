@@ -1,4 +1,4 @@
-name: TgTime Notifier Audit
+name: TgTime Aggregator Audit
 
 on:
     push:
