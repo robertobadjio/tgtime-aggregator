@@ -1,4 +1,4 @@
-name: TgTime Notifier Deploy
+name: TgTime Aggregator Deploy
 
 on:
     push:
