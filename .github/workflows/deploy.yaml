@@ -70,29 +70,10 @@ jobs:
             tags: ${{ steps.meta.outputs.tags }}
             labels: ${{ steps.meta.outputs.labels }}
 
-    migration_job:
+    migrations:
       runs-on: ubuntu-latest
       name: CI migration
       steps:
-        - name: Checkout
-          uses: actions/checkout@v2
-
-        - name: Check database migrations with DLE
-          uses: postgres-ai/dle-github-action@v0.2.0
-          id: db-migrations
-          with:
-            dbname: tgtime_aggregator
-            commands: |
-              sqitch deploy
-              echo 'Migration has been completed'
-            download_artifacts: true
-            observation_interval: "10"
-            max_lock_duration: "1"
-            max_duration: "600"
-          env:
-            DLMC_CI_ENDPOINT: ${{ secrets.DLMC_CI_ENDPOINT }}
-            DLMC_VERIFICATION_TOKEN: ${{ secrets.DLMC_VERIFICATION_TOKEN }}
-
         - name: Upload artifacts
           uses: actions/upload-artifact@v4
           with:
@@ -100,9 +81,6 @@ jobs:
             path: /opt/tgtime-aggregator/artifacts/*
             if-no-files-found: ignore
           if: always()
-
-        - name: Get the response status
-          run: echo "${{ steps.db-migrations.outputs.response }}"
 
     deploy:
       runs-on: self-hosted
