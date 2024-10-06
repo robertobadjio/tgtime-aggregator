@@ -9,22 +9,12 @@ services:
       - "${GRPC_PORT:-8082}:8082"
     networks:
       - tgtime-aggregator-network
-    depends_on:
-      db:
-        condition: migrate
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8081/service/status"]
       interval: 10s
       timeout: 10s
       retries: 5
       start_period: 1s
-  migrate:
-    image: migrate/migrate
-    networks:
-      - tgtime-aggregator-network
-    volumes:
-      - ./db/migrations:/migrations
-    command: ["-path", "/migrations", "-database", "postgres://${DATABASE_USER}:${DATABASE_PASSWORD}@database:${DATABASE_PORT}/${DATABASE_NAME}?sslmode=${DATABASE_SSL_MODE}", "up"]
 
 networks:
   tgtime-aggregator-network:
