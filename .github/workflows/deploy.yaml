@@ -78,7 +78,7 @@ jobs:
           uses: actions/checkout@v4
 
         - name: Check database migrations with DLE
-          uses: postgres-ai/dle-github-action@v0.1.1
+          uses: postgres-ai/dle-github-action@v0.2.0
           id: db-migrations
           with:
             dbname: tgtime_aggregator
