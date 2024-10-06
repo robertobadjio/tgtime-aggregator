@@ -78,7 +78,7 @@ jobs:
         - name: Upload artifacts
           uses: actions/upload-artifact@v4
           with:
-            name: migrations
+            name: my-artifact
             path: ./db/migrations/
             if-no-files-found: ignore
           if: always()
@@ -86,7 +86,7 @@ jobs:
         - name: Download all artifacts
           uses: actions/download-artifact@v4
           with:
-            name: migrations
+            name: my-artifact
             path: migrations
               - run: ls -R migrations
 
