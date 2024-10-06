@@ -37,10 +37,17 @@ var Db *sql.DB
 func main() {
 	cfg := config.New()
 
-	m, _ := migrate.New(
+	m, err := migrate.New(
 		"github://mattes:personal-access-token@mattes/migrate_test",
-		"postgres://localhost:5432/database?sslmode=enable")
-	_ = m.Run()
+		"postgres://"+cfg.DataBaseUser+":"+cfg.DataBasePassword+"@"+cfg.DataBaseHost+":"+cfg.DataBasePort+"/"+cfg.DataBaseName+"?sslmode="+cfg.DataBaseSslMode)
+
+	if err != nil {
+		panic(err)
+	}
+	err = m.Run()
+	if err != nil {
+		panic(err)
+	}
 
 	var (
 		logger   log.Logger
