@@ -79,7 +79,7 @@ jobs:
           uses: actions/upload-artifact@v4
           with:
             name: my-artifact
-            path: ./db/migrations/
+            path: db/migrations/
             if-no-files-found: ignore
           if: always()
 
