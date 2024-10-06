@@ -70,9 +70,35 @@ jobs:
             tags: ${{ steps.meta.outputs.tags }}
             labels: ${{ steps.meta.outputs.labels }}
 
+    migrate:
+      runs-on: ubuntu-latest
+      needs: build-and-push-image
+      defaults:
+        run:
+          working-directory: .
+
+      steps:
+        - name: Checkout
+          uses: actions/checkout@v3
+
+        - name: Run a multi-line script
+          run: |
+            mkdir ../migrations
+            cp -TR db/migrations ../migrations
+
+        - name: copy file via ssh password
+          uses: appleboy/scp-action@master
+          with:
+            host: ${{ secrets.HOST }}
+            username: ${{ secrets.USERNAME }}
+            key: ${{ secrets.KEY }}
+            port: ${{ secrets.PORT }}
+            source: "migrations/*"
+            target: "/opt/tgtime-aggregator/migartions"
+
     deploy:
       runs-on: self-hosted
-      needs: build-and-push-image
+      needs: migrate
 
       steps:
         - name: Log in to the Container registry
