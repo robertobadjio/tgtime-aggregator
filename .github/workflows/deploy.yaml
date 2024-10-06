@@ -79,15 +79,15 @@ jobs:
           uses: actions/upload-artifact@v4
           with:
             name: migrations
-            path: ./db/migrations/*
+            path: ./db/migrations/
             if-no-files-found: ignore
           if: always()
 
-        - name: Download All Artifacts
+        - name: Download all artifacts
           uses: actions/download-artifact@v4
           with:
             name: migrations
-            path: db/migrations/
+            path: migrations
               - run: ls -R migrations
 
     deploy:
