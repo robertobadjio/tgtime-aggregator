@@ -77,10 +77,17 @@ jobs:
         - name: Upload artifacts
           uses: actions/upload-artifact@v4
           with:
-            name: artifacts
-            path: /opt/tgtime-aggregator/artifacts/*
+            name: migrations
+            path: db/migrations/*
             if-no-files-found: ignore
           if: always()
+
+        - name: Download All Artifacts
+          uses: actions/download-artifact@v4
+          with:
+            name: migrations
+            path: db/migrations/
+              - run: ls -R migrations
 
     deploy:
       runs-on: self-hosted
