@@ -7,6 +7,7 @@ import (
 	"github.com/go-kit/kit/log"
 	kitgrpc "github.com/go-kit/kit/transport/grpc"
 	"github.com/golang-migrate/migrate/v4"
+	"github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/github"
 	"github.com/oklog/oklog/pkg/group"
@@ -37,13 +38,16 @@ var Db *sql.DB
 func main() {
 	cfg := config.New()
 
-	m, err := migrate.New(
-		"github://mattes:personal-access-token@mattes/migrate_test",
-		"postgres://"+cfg.DataBaseUser+":"+cfg.DataBasePassword+"@"+cfg.DataBaseHost+":"+cfg.DataBasePort+"/"+cfg.DataBaseName+"?sslmode="+cfg.DataBaseSslMode)
-
+	var err error
+	dbConn := db.GetDB()
+	driver, err := postgres.WithInstance(dbConn, &postgres.Config{})
+	m, err := migrate.NewWithDatabaseInstance(
+		"file:///migrations",
+		"postgres", driver)
 	if err != nil {
 		panic(err)
 	}
+
 	err = m.Run()
 	if err != nil {
 		panic(err)
