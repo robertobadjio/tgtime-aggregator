@@ -73,13 +73,16 @@ jobs:
     migrate:
       runs-on: ubuntu-latest
       needs: build-and-push-image
+      defaults:
+        run:
+          working-directory: ./db/migrations
 
       steps:
         - name: Upload artifacts
           uses: actions/upload-artifact@v4
           with:
             name: my-artifact
-            path: ./db/migrations/*
+            path: db/migrations
             if-no-files-found: ignore
           if: always()
 
