@@ -6,6 +6,9 @@ import (
 	"fmt"
 	"github.com/go-kit/kit/log"
 	kitgrpc "github.com/go-kit/kit/transport/grpc"
+	"github.com/golang-migrate/migrate/v4"
+	_ "github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/github"
 	"github.com/oklog/oklog/pkg/group"
 	aggregatorsvc "github.com/robertobadjio/tgtime-aggregator/api/v1/pb/aggregator"
 	"github.com/robertobadjio/tgtime-aggregator/internal/aggregator"
@@ -33,6 +36,11 @@ var Db *sql.DB
 
 func main() {
 	cfg := config.New()
+
+	m, _ := migrate.New(
+		"github://mattes:personal-access-token@mattes/migrate_test",
+		"postgres://localhost:5432/database?sslmode=enable")
+	_ = m.Run()
 
 	var (
 		logger   log.Logger

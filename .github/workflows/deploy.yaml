@@ -70,26 +70,9 @@ jobs:
             tags: ${{ steps.meta.outputs.tags }}
             labels: ${{ steps.meta.outputs.labels }}
 
-    migrate:
-      runs-on: ubuntu-latest
-      needs: build-and-push-image
-      defaults:
-        run:
-          working-directory: .
-
-      steps:
-        - name: Checkout
-          uses: actions/checkout@v3
-        - name: Migrate
-          uses: vovavc/migrate-github-action@v0.2.1
-          with:
-            path: ./db/migrations
-            database: postgres://tgtime_aggregator:tgtime_aggregator_password@host.docker.internal:5432/tgtime_aggregator?sslmode=disable
-            command: up
-
     deploy:
       runs-on: self-hosted
-      needs: migrate
+      needs: build-and-push-image
 
       steps:
         - name: Log in to the Container registry
