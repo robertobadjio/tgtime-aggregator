@@ -88,7 +88,6 @@ jobs:
           with:
             name: my-artifact
             path: migrations
-              - run: ls -R migrations
 
     deploy:
       runs-on: self-hosted
