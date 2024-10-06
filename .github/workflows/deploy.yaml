@@ -79,21 +79,13 @@ jobs:
 
       steps:
         - name: Checkout
-          uses: actions/checkout@v4
-
-        - name: Upload artifacts
-          uses: actions/upload-artifact@v4
+          uses: actions/checkout@v3
+        - name: Migrate
+          uses: vovavc/migrate-github-action@v0.2.1
           with:
-            name: my-artifact
-            path: db/migrations
-            if-no-files-found: ignore
-          if: always()
-
-        - name: Download all artifacts
-          uses: actions/download-artifact@v4
-          with:
-            name: my-artifact
-            path: migrations
+            path: ./db/migrations
+            database: postgres://tgtime_aggregator:tgtime_aggregator_password@host.docker.internal:5432/database_name?sslmode=disable
+            command: up
 
     deploy:
       runs-on: self-hosted
