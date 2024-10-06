@@ -16,6 +16,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o /tgtime-aggregator
 FROM scratch
 
 COPY --from=build /usr/share/zoneinfo/Europe/Moscow /usr/share/zoneinfo/Europe/Moscow
+COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=build /tgtime-aggregator .
 COPY --from=ghcr.io/tarampampam/curl:8.6.0 /bin/curl /bin/curl
 COPY --from=build /.env .
