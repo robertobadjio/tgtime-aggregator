@@ -94,7 +94,7 @@ jobs:
             DLMC_VERIFICATION_TOKEN: ${{ secrets.DLMC_VERIFICATION_TOKEN }}
 
         - name: Upload artifacts
-          uses: actions/upload-artifact@v2
+          uses: actions/upload-artifact@v4
           with:
             name: artifacts
             path: /opt/tgtime-aggregator/artifacts/*
