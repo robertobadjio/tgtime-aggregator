@@ -75,7 +75,7 @@ jobs:
       name: CI migration
       steps:
         - name: Checkout
-          uses: actions/checkout@v4
+          uses: actions/checkout@v2
 
         - name: Check database migrations with DLE
           uses: postgres-ai/dle-github-action@v0.2.0
