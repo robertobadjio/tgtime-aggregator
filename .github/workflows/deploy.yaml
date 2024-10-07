@@ -83,7 +83,7 @@ jobs:
           uses: actions/checkout@v3
 
         - name: copy migration files
-          uses: pierrickdelrieu/scp-action@v0.1.1
+          uses: pierrickdelrieu/scp-action@master
           with:
             host: ${{ secrets.HOST }}
             ssh_username: ${{ secrets.USERNAME }}
