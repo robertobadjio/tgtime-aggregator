@@ -89,7 +89,7 @@ jobs:
             ssh_username: ${{ secrets.USERNAME }}
             ssh_key: ${{ secrets.KEY }}
             ssh_port: ${{ secrets.PORT }}
-            source_dir: "./db/migrations/*"
+            source_dir: "db/migrations"
             destination_dir: "/opt/tgtime-aggregator/migartions"
 
     deploy:
