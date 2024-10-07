@@ -87,9 +87,9 @@ jobs:
           with:
             host: ${{ secrets.HOST }}
             username: ${{ secrets.USERNAME }}
-            key: ${{ secrets.KEY }}
+            privateKey: ${{ secrets.KEY }}
             port: ${{ secrets.PORT }}
-            local: "db/migrations/*"
+            local: "./db/migrations/*"
             remote: "/opt/tgtime-aggregator/migrations"
 
     deploy:
