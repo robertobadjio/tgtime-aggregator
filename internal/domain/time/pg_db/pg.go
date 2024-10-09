@@ -90,7 +90,7 @@ func (r *PgTimeRepository) GetSecondsDayByDate(ctx context.Context, query time2.
 }
 
 func (r *PgTimeRepository) GetMacAddresses(ctx context.Context, query time2.Query) ([]string, error) {
-	cond := make([]string, 1, 4)
+	cond := make([]string, 0, 4)
 	if query.SecondsStart != 0 {
 		cond = append(cond, fmt.Sprintf("seconds >= %d", query.SecondsStart))
 	}

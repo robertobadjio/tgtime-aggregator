@@ -45,8 +45,8 @@ func main() {
 	logger = log.NewLogfmtLogger(log.NewSyncWriter(os.Stderr))
 	logger = log.With(logger, "ts", log.DefaultTimestampUTC)
 
-	go aggregate(logger)
-	go sendPreviousDayInfo(logger)
+	//go aggregate(logger)
+	//go sendPreviousDayInfo(logger)
 
 	var (
 		s           = timeApp.NewService()
