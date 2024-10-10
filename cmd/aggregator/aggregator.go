@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"github.com/go-kit/kit/log"
 	kitgrpc "github.com/go-kit/kit/transport/grpc"
@@ -31,13 +30,12 @@ import (
 	"time"
 )
 
-var Db *sql.DB
+var logger log.Logger
 
 func main() {
 	cfg := config.New()
 
 	var (
-		logger   log.Logger
 		httpAddr = net.JoinHostPort("", cfg.HttpPort)
 		grpcAddr = net.JoinHostPort("", cfg.GrpcPort)
 	)
@@ -45,7 +43,7 @@ func main() {
 	logger = log.NewLogfmtLogger(log.NewSyncWriter(os.Stderr))
 	logger = log.With(logger, "ts", log.DefaultTimestampUTC)
 
-	//go aggregate(logger)
+	aggregate()
 	//go sendPreviousDayInfo(logger)
 
 	var (
@@ -67,7 +65,7 @@ func main() {
 			_ = logger.Log("transport", "HTTP", "addr", httpAddr)
 			return http.Serve(httpListener, httpHandler)
 		}, func(err error) {
-			httpListener.Close()
+			_ = httpListener.Close()
 		})
 	}
 	{
@@ -130,7 +128,7 @@ func sendPreviousDayInfo(logger log.Logger) {
 }
 
 // TODO: Горизонтальное масштабирование
-func aggregate(logger log.Logger) {
+func aggregate() {
 	t := time.Now()
 	n := time.Date(t.Year(), t.Month(), t.Day(), 0, 1, 0, 0, t.Location())
 	d := n.Sub(t)
@@ -142,28 +140,34 @@ func aggregate(logger log.Logger) {
 		time.Sleep(d)
 		d = 24 * time.Hour
 
-		tRepo := tPgRepo.NewPgRepository(Db)
-		tService := implementationT.NewTimeService(tRepo, logger)
+		go calcTimeSummary()
+	}
+}
 
-		tsRepo := tsPgRepo.NewPgRepository(Db)
-		tsService := implementationTs.NewTimeSummaryService(tsRepo, logger)
+func calcTimeSummary() error {
+	tService := implementationT.NewTimeService(tPgRepo.NewPgRepository(db.GetDB()), logger)
+	tsService := implementationTs.NewTimeSummaryService(tsPgRepo.NewPgRepository(db.GetDB()), logger)
 
-		agr := aggregator.NewAggregator(getDate("Europe/Moscow"), tService)
-		ctx := context.TODO()
-		macAddresses, _ := tService.GetMacAddresses(ctx, getDate("Europe/Moscow")) // TODO: Handle error
-		for _, macAddress := range macAddresses {
-			timeSummary, err := agr.AggregateTime(ctx, macAddress)
-			if err != nil {
-				_ = logger.Log("msg", err.Error())
-				continue
-			}
+	agr := aggregator.NewAggregator(getDate("Europe/Moscow"), tService)
+	ctx := context.TODO()
+	macAddresses, err := tService.GetMacAddresses(ctx, getDate("Europe/Moscow"))
+	if err != nil {
+		return fmt.Errorf("error calc time summary: %w", err)
+	}
+	for _, macAddress := range macAddresses {
+		timeSummary, err := agr.AggregateTime(ctx, macAddress)
+		if err != nil {
+			_ = logger.Log("msg", err.Error())
+			continue
+		}
 
-			err = tsService.CreateTimeSummary(ctx, timeSummary)
-			if err != nil {
-				_ = logger.Log("msg", err.Error())
-			}
+		err = tsService.CreateTimeSummary(ctx, timeSummary)
+		if err != nil {
+			_ = logger.Log("msg", err.Error())
 		}
 	}
+
+	return nil
 }
 
 func getDate(location string) time.Time {

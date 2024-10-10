@@ -33,23 +33,22 @@ func (r *PgTimeRepository) CreateTime(ctx context.Context, t *time2.TimeUser) er
 }
 
 func (r *PgTimeRepository) GetByFilters(ctx context.Context, query time2.Query) ([]*time2.TimeUser, error) {
-	cond := make([]string, 1, 4)
+	cond := make([]string, 0, 4)
 	if query.SecondsStart != 0 {
-		cond = append(cond, fmt.Sprintf("seconds >= %d", query.SecondsStart))
+		cond = append(cond, fmt.Sprintf("seconds::integer >= %d", query.SecondsStart))
 	}
 	if query.SecondsEnd != 0 {
-		cond = append(cond, fmt.Sprintf("seconds <= %d", query.SecondsEnd))
+		cond = append(cond, fmt.Sprintf("seconds::integer <= %d", query.SecondsEnd))
 	}
 	if query.MacAddress != "" {
-		cond = append(cond, fmt.Sprintf(`mac_address = "%s"`, query.MacAddress))
+		cond = append(cond, fmt.Sprintf(`mac_address = '%s'`, query.MacAddress))
 	}
 	if query.RouterId != 0 {
-		cond = append(cond, fmt.Sprintf(`router_id = "%d"`, query.RouterId))
+		cond = append(cond, fmt.Sprintf(`router_id = %d`, query.RouterId))
 	}
-
 	rows, err := r.db.QueryContext(
 		ctx,
-		"SELECT t.mac_address, t.second FROM time t WHERE "+strings.Join(cond, " AND ")+" ORDER BY t.second",
+		"SELECT mac_address, seconds FROM time WHERE "+strings.Join(cond, " AND ")+" ORDER BY seconds",
 	)
 	if err != nil {
 		return []*time2.TimeUser{}, nil
@@ -76,7 +75,7 @@ func (r *PgTimeRepository) GetSecondsDayByDate(ctx context.Context, query time2.
 	var beginSecond int64
 	if err := r.db.QueryRowContext(
 		ctx,
-		"SELECT t.second FROM time t WHERE t.mac_address = $1 AND t.second BETWEEN $2 AND $3 ORDER BY t.second "+sort+" LIMIT 1",
+		"SELECT seconds FROM time WHERE mac_address = $1 AND seconds::integer BETWEEN $2 AND $3 ORDER BY seconds "+sort+" LIMIT 1",
 		query.MacAddress,
 		query.SecondsStart,
 		query.SecondsEnd,
@@ -92,10 +91,10 @@ func (r *PgTimeRepository) GetSecondsDayByDate(ctx context.Context, query time2.
 func (r *PgTimeRepository) GetMacAddresses(ctx context.Context, query time2.Query) ([]string, error) {
 	cond := make([]string, 0, 4)
 	if query.SecondsStart != 0 {
-		cond = append(cond, fmt.Sprintf("seconds >= %d", query.SecondsStart))
+		cond = append(cond, fmt.Sprintf("seconds::integer >= %d", query.SecondsStart))
 	}
 	if query.SecondsEnd != 0 {
-		cond = append(cond, fmt.Sprintf("seconds <= %d", query.SecondsEnd))
+		cond = append(cond, fmt.Sprintf("seconds::integer <= %d", query.SecondsEnd))
 	}
 	if query.MacAddress != "" {
 		cond = append(cond, fmt.Sprintf(`mac_address = "%s"`, query.MacAddress))
@@ -106,10 +105,10 @@ func (r *PgTimeRepository) GetMacAddresses(ctx context.Context, query time2.Quer
 
 	rows, err := r.db.QueryContext(
 		ctx,
-		"SELECT t.mac_address FROM time t WHERE "+strings.Join(cond, " AND ")+" GROUP BY t.mac_address",
+		"SELECT mac_address FROM time WHERE "+strings.Join(cond, " AND ")+" GROUP BY mac_address",
 	)
 	if err != nil {
-		return []string{}, nil
+		return []string{}, fmt.Errorf("error getting mac addresses from db: %v", err)
 	}
 	defer func() {
 		_ = rows.Close()

@@ -19,7 +19,7 @@ func NewPgRepository(db *sql.DB) *PgTimeSummaryRepository {
 func (r *PgTimeSummaryRepository) CreateTimeSummary(ctx context.Context, ts *time_summary.TimeSummary) error {
 	_, err := r.db.ExecContext(
 		ctx,
-		"INSERT INTO time_summary (mac_address, date, seconds, breaks, seconds_begin, seconds_end) VALUES ($1, $2, $3, $4, $5, $6)",
+		"INSERT IGNORE INTO time_summary (mac_address, date, seconds, breaks, seconds_begin, seconds_end) VALUES ($1, $2, $3, $4, $5, $6)",
 		ts.MacAddress,
 		ts.Date,
 		ts.Seconds,

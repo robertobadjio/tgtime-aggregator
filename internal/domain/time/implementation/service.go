@@ -39,7 +39,7 @@ func (s *TimeService) GetByFilters(
 	q := time2.Query{MacAddress: macAddress, SecondsStart: secondsStart, SecondsEnd: secondsEnd, RouterId: routerId}
 	users, err := s.repository.GetByFilters(ctx, q)
 	if err != nil {
-		s.logger.Log("msg", err.Error())
+		_ = s.logger.Log("msg", err.Error())
 		return []*time2.TimeUser{}, err
 	}
 
@@ -129,7 +129,7 @@ func (s *TimeService) GetMacAddresses(ctx context.Context, date time.Time) ([]st
 	q := time2.Query{SecondsStart: secondsStart, SecondsEnd: secondsEnd}
 	macAddresses, err := s.repository.GetMacAddresses(ctx, q)
 	if err != nil {
-		s.logger.Log("msg", err.Error())
+		_ = s.logger.Log("msg", err.Error())
 		return []string{}, err
 	}
 

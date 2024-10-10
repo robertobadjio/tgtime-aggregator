@@ -26,7 +26,7 @@ func (s *TimeSummaryService) CreateTimeSummary(
 	ts *time_summary.TimeSummary,
 ) error {
 	if err := s.repository.CreateTimeSummary(ctx, ts); err != nil {
-		s.logger.Log("msg", err.Error())
+		_ = s.logger.Log("msg", err.Error())
 		return err // TODO: !
 	}
 
