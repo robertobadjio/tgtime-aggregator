@@ -99,7 +99,7 @@ jobs:
             key: ${{ secrets.KEY }}
             port: ${{ secrets.PORT }}
             script: |
-              migrate -source file:///opt/tgtime-aggregator/db/migrations -database postgres://tgtime_aggregator:tgtime_aggregator_password@localhost:5432/tgtime_aggregator?sslmode=disable up
+              migrate -source file:///opt/tgtime-aggregator/db/migrations -database postgres://tgtime_aggregator_user:tgtime_aggregator_password@localhost:5432/tgtime_aggregator?sslmode=disable up
 
     deploy:
       runs-on: self-hosted
