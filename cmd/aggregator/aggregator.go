@@ -43,7 +43,7 @@ func main() {
 	logger = log.NewLogfmtLogger(log.NewSyncWriter(os.Stderr))
 	logger = log.With(logger, "ts", log.DefaultTimestampUTC)
 
-	aggregate()
+	go aggregate()
 	//go sendPreviousDayInfo(logger)
 
 	var (
@@ -140,7 +140,7 @@ func aggregate() {
 		time.Sleep(d)
 		d = 24 * time.Hour
 
-		go calcTimeSummary()
+		calcTimeSummary()
 	}
 }
 
