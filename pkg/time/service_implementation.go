@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/go-kit/kit/log"
+	aggregator2 "github.com/robertobadjio/tgtime-aggregator/internal/aggregator"
 	"github.com/robertobadjio/tgtime-aggregator/internal/db"
 	"github.com/robertobadjio/tgtime-aggregator/internal/domain/time"
 	"github.com/robertobadjio/tgtime-aggregator/internal/domain/time/implementation"
@@ -13,6 +14,7 @@ import (
 	domainTimeSummary "github.com/robertobadjio/tgtime-aggregator/internal/domain/time_summary/pg_db"
 	"net/http"
 	"os"
+	t "time"
 )
 
 type apiService struct {
@@ -52,7 +54,30 @@ func (s *apiService) GetTimeSummary(
 		return nil, fmt.Errorf("error getting time summary")
 	}
 
+	// TODO: Refactoring
+	flagMacAddress := ""
+	flagToday := false
+	for _, filter := range filters {
+		if filter.Key == "mac_address" {
+			flagMacAddress = filter.Value
+		} else if filter.Key == "date" && filter.Value == getDate("Europe/Moscow").Format("2006-01-02") {
+			flagToday = true
+		}
+	}
+
+	if flagMacAddress != "" && flagToday {
+		tService := implementation.NewTimeService(pg_db.NewPgRepository(db.GetDB()), logger)
+		agr := aggregator2.NewAggregator(getDate("Europe/Moscow"), tService)
+		todayTimeSummary, _ := agr.AggregateTime(ctx, flagMacAddress) // TODO: Handle error
+		ts = append(ts, todayTimeSummary)
+	}
+
 	return ts, nil
+}
+
+func getDate(location string) t.Time {
+	moscowLocation, _ := t.LoadLocation(location)
+	return t.Now().AddDate(0, 0, -1).In(moscowLocation)
 }
 
 func (s *apiService) ServiceStatus(_ context.Context) int {

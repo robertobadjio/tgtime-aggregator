@@ -155,19 +155,32 @@ func calcTimeSummary() error {
 		return fmt.Errorf("error calc time summary: %w", err)
 	}
 	for _, macAddress := range macAddresses {
-		timeSummary, err := agr.AggregateTime(ctx, macAddress)
+		timeSummary, err := calcTimeSummaryByMacAddress(ctx, agr, macAddress)
 		if err != nil {
 			_ = logger.Log("msg", err.Error())
-			continue
 		}
 
 		err = tsService.CreateTimeSummary(ctx, timeSummary)
 		if err != nil {
-			_ = logger.Log("msg", err.Error())
+			return fmt.Errorf("error calc time summary by mac address "+macAddress+": %w", err)
 		}
 	}
 
 	return nil
+}
+
+func calcTimeSummaryByMacAddress(
+	ctx context.Context,
+	agr *aggregator.Aggregator,
+	macAddress string,
+) (*time_summary.TimeSummary, error) {
+	timeSummary, err := agr.AggregateTime(ctx, macAddress)
+	if err != nil {
+		return nil, fmt.Errorf("error calc time summary by mac address "+macAddress+": %w", err)
+
+	}
+
+	return timeSummary, nil
 }
 
 func getDate(location string) time.Time {
