@@ -58,13 +58,14 @@ func (s *apiService) GetTimeSummary(
 	flagMacAddress := ""
 	flagToday := false
 	for _, filter := range filters {
+		fmt.Println(filter.Key, filter.Value, getDate("Europe/Moscow").Format("2006-01-02"))
 		if filter.Key == "mac_address" {
 			flagMacAddress = filter.Value
 		} else if filter.Key == "date" && filter.Value == getDate("Europe/Moscow").Format("2006-01-02") {
 			flagToday = true
 		}
 	}
-
+	fmt.Println(flagMacAddress, flagToday)
 	if flagMacAddress != "" && flagToday {
 		tService := implementation.NewTimeService(pg_db.NewPgRepository(db.GetDB()), logger)
 		agr := aggregator2.NewAggregator(getDate("Europe/Moscow"), tService)
@@ -77,7 +78,7 @@ func (s *apiService) GetTimeSummary(
 
 func getDate(location string) t.Time {
 	moscowLocation, _ := t.LoadLocation(location)
-	return t.Now().AddDate(0, 0, -1).In(moscowLocation)
+	return t.Now().In(moscowLocation)
 }
 
 func (s *apiService) ServiceStatus(_ context.Context) int {
