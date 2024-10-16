@@ -7,12 +7,12 @@ import (
 
 // CreateTimeRequest ???
 type CreateTimeRequest struct {
-	Time *time.TimeUser `json:"time"`
+	Time *time.Time `json:"time"`
 }
 
 // CreateTimeResponse ???
 type CreateTimeResponse struct {
-	Time *time.TimeUser `json:"time"`
+	Time *time.Time `json:"time"`
 }
 
 // GetTimeSummaryRequest ???

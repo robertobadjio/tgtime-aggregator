@@ -21,7 +21,7 @@ func NewPgRepository(db *sql.DB) *PgTimeRepository {
 }
 
 // CreateTime ???
-func (r *PgTimeRepository) CreateTime(ctx context.Context, t *timeDomain.TimeUser) error {
+func (r *PgTimeRepository) CreateTime(ctx context.Context, t *timeDomain.Time) error {
 	_, err := r.db.ExecContext(
 		ctx,
 		"INSERT INTO time (mac_address, seconds, router_id) VALUES ($1, $2, $3)",
@@ -37,7 +37,7 @@ func (r *PgTimeRepository) CreateTime(ctx context.Context, t *timeDomain.TimeUse
 }
 
 // GetByFilters ???
-func (r *PgTimeRepository) GetByFilters(ctx context.Context, query timeDomain.Query) ([]*timeDomain.TimeUser, error) {
+func (r *PgTimeRepository) GetByFilters(ctx context.Context, query timeDomain.Query) ([]*timeDomain.Time, error) {
 	cond := make([]string, 0, 4)
 	if query.SecondsStart != 0 {
 		cond = append(cond, fmt.Sprintf("seconds::integer >= %d", query.SecondsStart))
@@ -59,18 +59,18 @@ func (r *PgTimeRepository) GetByFilters(ctx context.Context, query timeDomain.Qu
 		),
 	)
 	if err != nil {
-		return []*timeDomain.TimeUser{}, nil
+		return []*timeDomain.Time{}, nil
 	}
 	defer func() {
 		_ = rows.Close()
 	}()
 
-	times := make([]*timeDomain.TimeUser, 0)
+	times := make([]*timeDomain.Time, 0)
 	for rows.Next() {
-		t := new(timeDomain.TimeUser)
+		t := new(timeDomain.Time)
 		err = rows.Scan(&t.MacAddress, &t.Seconds)
 		if err != nil {
-			return []*timeDomain.TimeUser{}, nil
+			return []*timeDomain.Time{}, nil
 		}
 
 		times = append(times, t)

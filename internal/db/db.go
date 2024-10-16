@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"time"
 
+	// Register some standard stuff
 	_ "github.com/lib/pq"
 	"github.com/robertobadjio/tgtime-aggregator/internal/config"
 )

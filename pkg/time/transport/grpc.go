@@ -57,7 +57,7 @@ func (g *grpcServer) GetSummary(
 
 func decodeGRPCCreateRequest(_ context.Context, grpcReq interface{}) (interface{}, error) {
 	req := grpcReq.(*time_v1.CreateRequest)
-	t := time.TimeUser{MacAddress: req.MacAddress, Seconds: req.Seconds, RouterID: req.RouterId}
+	t := time.Time{MacAddress: req.MacAddress, Seconds: req.Seconds, RouterID: req.RouterId}
 
 	return endpoints.CreateTimeRequest{Time: &t}, nil
 }

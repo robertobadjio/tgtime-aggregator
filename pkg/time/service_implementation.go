@@ -33,7 +33,7 @@ func NewService() Service {
 }
 
 // CreateTime ???
-func (s *apiService) CreateTime(ctx context.Context, t *time.TimeUser) (*time.TimeUser, error) {
+func (s *apiService) CreateTime(ctx context.Context, t *time.Time) (*time.Time, error) {
 	repo := pg_db.NewPgRepository(db.GetDB())
 	timeService := implementation.NewTimeService(repo, logger)
 	err := timeService.CreateTime(ctx, t)

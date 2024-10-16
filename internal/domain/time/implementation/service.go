@@ -24,7 +24,7 @@ func NewTimeService(rep time2.Repository, logger log.Logger) *TimeService {
 }
 
 // CreateTime Добавить время пребывания сотрудника на работе / в офисе
-func (s *TimeService) CreateTime(ctx context.Context, t *time2.TimeUser) error {
+func (s *TimeService) CreateTime(ctx context.Context, t *time2.Time) error {
 	if err := s.repository.CreateTime(ctx, t); err != nil {
 		_ = s.logger.Log("msg", err.Error())
 		return err // TODO: !
@@ -39,14 +39,14 @@ func (s *TimeService) GetByFilters(
 	macAddress string,
 	date time.Time,
 	routerID int,
-) ([]*time2.TimeUser, error) {
+) ([]*time2.Time, error) {
 	secondsStart := getSecondsByBeginDate(date.Format("2006-01-02"))
 	secondsEnd := getSecondsByEndDate(date.Format("2006-01-02"))
 	q := time2.Query{MacAddress: macAddress, SecondsStart: secondsStart, SecondsEnd: secondsEnd, RouterID: routerID}
 	users, err := s.repository.GetByFilters(ctx, q)
 	if err != nil {
 		_ = s.logger.Log("msg", err.Error())
-		return []*time2.TimeUser{}, err
+		return []*time2.Time{}, err
 	}
 
 	return users, nil
@@ -91,7 +91,7 @@ func (s *TimeService) GetEndSecondDayByDate(
 }
 
 // AggregateDayTotalTime Подсчет общего количества секунд
-func (s *TimeService) AggregateDayTotalTime(times []*time2.TimeUser) (int64, error) {
+func (s *TimeService) AggregateDayTotalTime(times []*time2.Time) (int64, error) {
 	var sum int64
 	for i, t := range times {
 		if i == 0 {
@@ -108,7 +108,7 @@ func (s *TimeService) AggregateDayTotalTime(times []*time2.TimeUser) (int64, err
 }
 
 // GetAllBreaksByTimes Подсчет перерывов в работе
-func (s *TimeService) GetAllBreaksByTimes(times []*time2.TimeUser) ([]*time_summary.Break, error) {
+func (s *TimeService) GetAllBreaksByTimes(times []*time2.Time) ([]*time_summary.Break, error) {
 	breaks := make([]*time_summary.Break, 0) // TODO: len
 	for i, t := range times {
 		if i == 0 {
