@@ -2,16 +2,19 @@ package endpoints
 
 import (
 	"context"
+
 	"github.com/go-kit/kit/endpoint"
 	"github.com/robertobadjio/tgtime-aggregator/pkg/time"
 )
 
+// Set ???
 type Set struct {
 	CreateTimeEndpoint    endpoint.Endpoint
 	GetTimeSummary        endpoint.Endpoint
 	ServiceStatusEndpoint endpoint.Endpoint
 }
 
+// NewEndpointSet ???
 func NewEndpointSet(svc time.Service) Set {
 	return Set{
 		CreateTimeEndpoint:    MakeCreateTimeEndpoint(svc),
@@ -20,6 +23,7 @@ func NewEndpointSet(svc time.Service) Set {
 	}
 }
 
+// MakeCreateTimeEndpoint ???
 func MakeCreateTimeEndpoint(svc time.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(CreateTimeRequest)
@@ -32,6 +36,7 @@ func MakeCreateTimeEndpoint(svc time.Service) endpoint.Endpoint {
 	}
 }
 
+// MakeGetTimeSummaryEndpoint ???
 func MakeGetTimeSummaryEndpoint(svc time.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(GetTimeSummaryRequest)
@@ -45,6 +50,7 @@ func MakeGetTimeSummaryEndpoint(svc time.Service) endpoint.Endpoint {
 	}
 }
 
+// MakeServiceStatusEndpoint ???
 func MakeServiceStatusEndpoint(svc time.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		_ = request.(ServiceStatusRequest)

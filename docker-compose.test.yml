@@ -10,8 +10,8 @@ services:
       dockerfile: ./docker/app/Dockerfile
     container_name: tgtime-aggregator
     ports:
-      - "${HTTP_PORT:-8081}:8081"
-      - "${GRPC_PORT:-8082}:8082"
+      - "8080:8080"
+      - "50051:50051"
     networks:
       - tgtime-aggregator-network
       - test-network
@@ -26,7 +26,7 @@ services:
     container_name: tgtime-aggregator-db
     restart: always
     ports:
-      - "${DATABASE_PORT:-5432}:5432"
+      - "5432:5432"
     volumes:
       - tgtime-aggregator-data:/var/lib/postgresql/data
     environment:

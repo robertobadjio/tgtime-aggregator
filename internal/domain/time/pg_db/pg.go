@@ -5,25 +5,29 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	time2 "github.com/robertobadjio/tgtime-aggregator/internal/domain/time"
 	"strings"
+
+	timeDomain "github.com/robertobadjio/tgtime-aggregator/internal/domain/time"
 )
 
+// PgTimeRepository ???
 type PgTimeRepository struct {
 	db *sql.DB
 }
 
+// NewPgRepository ???
 func NewPgRepository(db *sql.DB) *PgTimeRepository {
 	return &PgTimeRepository{db: db}
 }
 
-func (r *PgTimeRepository) CreateTime(ctx context.Context, t *time2.TimeUser) error {
+// CreateTime ???
+func (r *PgTimeRepository) CreateTime(ctx context.Context, t *timeDomain.TimeUser) error {
 	_, err := r.db.ExecContext(
 		ctx,
 		"INSERT INTO time (mac_address, seconds, router_id) VALUES ($1, $2, $3)",
 		t.MacAddress,
 		t.Seconds,
-		t.RouterId,
+		t.RouterID,
 	)
 	if err != nil {
 		return err
@@ -32,7 +36,8 @@ func (r *PgTimeRepository) CreateTime(ctx context.Context, t *time2.TimeUser) er
 	return nil
 }
 
-func (r *PgTimeRepository) GetByFilters(ctx context.Context, query time2.Query) ([]*time2.TimeUser, error) {
+// GetByFilters ???
+func (r *PgTimeRepository) GetByFilters(ctx context.Context, query timeDomain.Query) ([]*timeDomain.TimeUser, error) {
 	cond := make([]string, 0, 4)
 	if query.SecondsStart != 0 {
 		cond = append(cond, fmt.Sprintf("seconds::integer >= %d", query.SecondsStart))
@@ -43,26 +48,29 @@ func (r *PgTimeRepository) GetByFilters(ctx context.Context, query time2.Query) 
 	if query.MacAddress != "" {
 		cond = append(cond, fmt.Sprintf(`mac_address = '%s'`, query.MacAddress))
 	}
-	if query.RouterId != 0 {
-		cond = append(cond, fmt.Sprintf(`router_id = %d`, query.RouterId))
+	if query.RouterID != 0 {
+		cond = append(cond, fmt.Sprintf(`router_id = %d`, query.RouterID))
 	}
 	rows, err := r.db.QueryContext(
 		ctx,
-		"SELECT mac_address, seconds FROM time WHERE "+strings.Join(cond, " AND ")+" ORDER BY seconds",
+		fmt.Sprintf(
+			"SELECT mac_address, seconds FROM time WHERE %s ORDER BY seconds",
+			strings.Join(cond, " AND "),
+		),
 	)
 	if err != nil {
-		return []*time2.TimeUser{}, nil
+		return []*timeDomain.TimeUser{}, nil
 	}
 	defer func() {
 		_ = rows.Close()
 	}()
 
-	times := make([]*time2.TimeUser, 0)
+	times := make([]*timeDomain.TimeUser, 0)
 	for rows.Next() {
-		t := new(time2.TimeUser)
+		t := new(timeDomain.TimeUser)
 		err = rows.Scan(&t.MacAddress, &t.Seconds)
 		if err != nil {
-			return []*time2.TimeUser{}, nil
+			return []*timeDomain.TimeUser{}, nil
 		}
 
 		times = append(times, t)
@@ -71,24 +79,28 @@ func (r *PgTimeRepository) GetByFilters(ctx context.Context, query time2.Query) 
 	return times, nil
 }
 
-func (r *PgTimeRepository) GetSecondsDayByDate(ctx context.Context, query time2.Query, sort string) (int64, error) {
+// GetSecondsDayByDate ???
+func (r *PgTimeRepository) GetSecondsDayByDate(ctx context.Context, query timeDomain.Query, sort string) (int64, error) {
 	var beginSecond int64
-	if err := r.db.QueryRowContext(
+	err := r.db.QueryRowContext(
 		ctx,
 		"SELECT seconds FROM time WHERE mac_address = $1 AND seconds::integer BETWEEN $2 AND $3 ORDER BY seconds "+sort+" LIMIT 1",
 		query.MacAddress,
 		query.SecondsStart,
 		query.SecondsEnd,
-	).Scan(&beginSecond); err == nil {
+	).Scan(&beginSecond)
+	if err == nil {
 		return beginSecond, nil
-	} else if errors.Is(err, sql.ErrNoRows) {
-		return 0, nil
-	} else {
-		return 0, fmt.Errorf("error getting time summary from db: %v", err)
 	}
+	if errors.Is(err, sql.ErrNoRows) {
+		return 0, nil
+	}
+
+	return 0, fmt.Errorf("error getting time summary from db: %v", err)
 }
 
-func (r *PgTimeRepository) GetMacAddresses(ctx context.Context, query time2.Query) ([]string, error) {
+// GetMacAddresses ???
+func (r *PgTimeRepository) GetMacAddresses(ctx context.Context, query timeDomain.Query) ([]string, error) {
 	cond := make([]string, 0, 4)
 	if query.SecondsStart != 0 {
 		cond = append(cond, fmt.Sprintf("seconds::integer >= %d", query.SecondsStart))
@@ -99,13 +111,16 @@ func (r *PgTimeRepository) GetMacAddresses(ctx context.Context, query time2.Quer
 	if query.MacAddress != "" {
 		cond = append(cond, fmt.Sprintf(`mac_address = "%s"`, query.MacAddress))
 	}
-	if query.RouterId != 0 {
-		cond = append(cond, fmt.Sprintf(`router_id = "%d"`, query.RouterId))
+	if query.RouterID != 0 {
+		cond = append(cond, fmt.Sprintf(`router_id = "%d"`, query.RouterID))
 	}
 
 	rows, err := r.db.QueryContext(
 		ctx,
-		"SELECT mac_address FROM time WHERE "+strings.Join(cond, " AND ")+" GROUP BY mac_address",
+		fmt.Sprintf(
+			"SELECT mac_address FROM time WHERE %s GROUP BY mac_address",
+			strings.Join(cond, " AND "),
+		),
 	)
 	if err != nil {
 		return []string{}, fmt.Errorf("error getting mac addresses from db: %v", err)

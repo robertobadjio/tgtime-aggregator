@@ -5,25 +5,26 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/go-kit/kit/log"
+	"net/http"
+
 	httptransport "github.com/go-kit/kit/transport/http"
 	"github.com/gorilla/mux"
 	"github.com/robertobadjio/tgtime-aggregator/internal/error_helper"
 	"github.com/robertobadjio/tgtime-aggregator/pkg/time/endpoints"
-	"net/http"
-	"os"
+)
+
+const (
+	basePostfix          = "/api"
+	versionAPIPostfix    = "/v1"
+	serviceStatusPostfix = "/service/status"
+	timePostfix          = "/time"
 )
 
 type errorer interface {
 	Error() error
 }
 
-var logger log.Logger
-
-func init() {
-	logger = log.NewLogfmtLogger(log.NewSyncWriter(os.Stderr))
-}
-
+// NewHTTPHandler ???
 func NewHTTPHandler(ep endpoints.Set) http.Handler {
 	router := mux.NewRouter()
 
@@ -31,7 +32,7 @@ func NewHTTPHandler(ep endpoints.Set) http.Handler {
 		httptransport.ServerErrorEncoder(encodeError),
 	}
 
-	router.Methods(http.MethodGet).Path("/service/status").Handler(
+	router.Methods(http.MethodGet).Path(serviceStatusPostfix).Handler(
 		httptransport.NewServer(
 			ep.ServiceStatusEndpoint,
 			decodeHTTPServiceStatusRequest,
@@ -40,14 +41,14 @@ func NewHTTPHandler(ep endpoints.Set) http.Handler {
 		),
 	)
 
-	var api = router.PathPrefix("/api").Subrouter()
+	var api = router.PathPrefix(basePostfix).Subrouter()
 
 	var api1 = api.
-		PathPrefix("/v1").
+		PathPrefix(versionAPIPostfix).
 		Subrouter()
 
 	api1.Methods(http.MethodPost).
-		Path("/time").
+		Path(timePostfix).
 		Handler(
 			httptransport.NewServer(
 				ep.CreateTimeEndpoint,
@@ -112,7 +113,7 @@ func encodeError(_ context.Context, err error, w http.ResponseWriter) {
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 
-	json.NewEncoder(w).Encode(map[string]interface{}{
+	_ = json.NewEncoder(w).Encode(map[string]interface{}{ // TODO: Handle error
 		"error": err.Error(),
 	})
 }

@@ -4,18 +4,82 @@ services:
       context: .
       dockerfile: ./docker/app/Dockerfile
     container_name: tgtime-aggregator
+    env_file:
+      - .env
     ports:
-      - "${HTTP_PORT:-8081}:8081"
-      - "${GRPC_PORT:-8082}:8082"
+      - "${HTTP_PORT}:${HTTP_PORT}"
+      - "${GRPC_PORT}:${GRPC_PORT}"
     networks:
       - tgtime-aggregator-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8081/service/status"]
+      test: ["CMD", "curl", "-f", "http://localhost:8080/service/status"]
       interval: 10s
       timeout: 10s
       retries: 5
       start_period: 1s
+    depends_on:
+      tgtime-api:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+    links:
+      - db
+  tgtime-api:
+    build:
+      context: .
+      dockerfile: ./docker/tgtime_api/Dockerfile
+    environment:
+      MOCKSERVER_INITIALIZATION_JSON_PATH: /config/initializerJson.json
+      MOCKSERVER_LOG_LEVEL: INFO
+      MOCKSERVER_PROPERTY_FILE: /config/mockserver.properties
+    volumes:
+      - ./docker/tgtime_api/config:/config
+      - ./docker/tgtime_api/config/mockserver.properties:/config/mockserver.properties
+    networks:
+      - tgtime-aggregator-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:1080/liveness/probe"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+  db:
+    image: postgres:16.2
+    container_name: tgtime-aggregator-db
+    restart: always
+    ports:
+      - "${DATABASE_PG_PORT}:${DATABASE_PG_PORT}"
+    volumes:
+      - tgtime-aggregator-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: ${DATABASE_PG_NAME}
+      POSTGRES_USER: ${DATABASE_PG_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PG_PASSWORD}
+    networks:
+      tgtime-aggregator-network:
+        aliases:
+          - database
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 1s
+  migrate:
+    image: migrate/migrate
+    networks:
+      - tgtime-aggregator-network
+    volumes:
+      - ${DATABASE_MIGRATION_DIR}:/migrations
+    command: ["-path", "/migrations", "-database", "postgres://${DATABASE_PG_USER}:${DATABASE_PG_PASSWORD}@database:${DATABASE_PG_PORT}/${DATABASE_PG_NAME}?sslmode=${DATABASE_PG_SSL_MODE}", "up"]
+    links:
+      - db
+    depends_on:
+      db:
+        condition: service_healthy
 
 networks:
   tgtime-aggregator-network:
     driver: bridge
+
+volumes:
+  tgtime-aggregator-data:

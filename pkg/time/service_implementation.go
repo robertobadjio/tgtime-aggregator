@@ -3,6 +3,10 @@ package time
 import (
 	"context"
 	"fmt"
+	"net/http"
+	"os"
+	t "time"
+
 	"github.com/go-kit/kit/log"
 	aggregator2 "github.com/robertobadjio/tgtime-aggregator/internal/aggregator"
 	"github.com/robertobadjio/tgtime-aggregator/internal/db"
@@ -12,9 +16,6 @@ import (
 	"github.com/robertobadjio/tgtime-aggregator/internal/domain/time_summary"
 	timeSummaryimplementation "github.com/robertobadjio/tgtime-aggregator/internal/domain/time_summary/implementation"
 	domainTimeSummary "github.com/robertobadjio/tgtime-aggregator/internal/domain/time_summary/pg_db"
-	"net/http"
-	"os"
-	t "time"
 )
 
 type apiService struct {
@@ -26,10 +27,12 @@ func init() {
 	logger = log.NewLogfmtLogger(log.NewSyncWriter(os.Stderr))
 }
 
+// NewService ???
 func NewService() Service {
 	return &apiService{}
 }
 
+// CreateTime ???
 func (s *apiService) CreateTime(ctx context.Context, t *time.TimeUser) (*time.TimeUser, error) {
 	repo := pg_db.NewPgRepository(db.GetDB())
 	timeService := implementation.NewTimeService(repo, logger)
@@ -42,6 +45,7 @@ func (s *apiService) CreateTime(ctx context.Context, t *time.TimeUser) (*time.Ti
 	return t, nil
 }
 
+// GetTimeSummary ???
 func (s *apiService) GetTimeSummary(
 	ctx context.Context,
 	filters []*time_summary.Filter,
@@ -58,14 +62,12 @@ func (s *apiService) GetTimeSummary(
 	flagMacAddress := ""
 	flagToday := false
 	for _, filter := range filters {
-		fmt.Println(filter.Key, filter.Value, getDate("Europe/Moscow").Format("2006-01-02"))
 		if filter.Key == "mac_address" {
 			flagMacAddress = filter.Value
 		} else if filter.Key == "date" && filter.Value == getDate("Europe/Moscow").Format("2006-01-02") {
 			flagToday = true
 		}
 	}
-	fmt.Println(flagMacAddress, flagToday)
 	if flagMacAddress != "" && flagToday {
 		tService := implementation.NewTimeService(pg_db.NewPgRepository(db.GetDB()), logger)
 		agr := aggregator2.NewAggregator(getDate("Europe/Moscow"), tService)
@@ -81,6 +83,7 @@ func getDate(location string) t.Time {
 	return t.Now().In(moscowLocation)
 }
 
+// ServiceStatus ???
 func (s *apiService) ServiceStatus(_ context.Context) int {
 	_ = logger.Log("msg", "Checking the Service health...")
 	return http.StatusOK

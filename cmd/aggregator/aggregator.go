@@ -1,49 +1,49 @@
 package main
 
 import (
-	"context"
 	"fmt"
-	"github.com/go-kit/kit/log"
-	kitgrpc "github.com/go-kit/kit/transport/grpc"
-	_ "github.com/golang-migrate/migrate/v4/database/postgres"
-	_ "github.com/golang-migrate/migrate/v4/source/github"
-	"github.com/oklog/oklog/pkg/group"
-	aggregatorsvc "github.com/robertobadjio/tgtime-aggregator/api/v1/pb/aggregator"
-	"github.com/robertobadjio/tgtime-aggregator/internal/aggregator"
-	"github.com/robertobadjio/tgtime-aggregator/internal/config"
-	"github.com/robertobadjio/tgtime-aggregator/internal/db"
-	implementationT "github.com/robertobadjio/tgtime-aggregator/internal/domain/time/implementation"
-	tPgRepo "github.com/robertobadjio/tgtime-aggregator/internal/domain/time/pg_db"
-	"github.com/robertobadjio/tgtime-aggregator/internal/domain/time_summary"
-	implementationTs "github.com/robertobadjio/tgtime-aggregator/internal/domain/time_summary/implementation"
-	tsPgRepo "github.com/robertobadjio/tgtime-aggregator/internal/domain/time_summary/pg_db"
-	"github.com/robertobadjio/tgtime-aggregator/internal/kafka"
-	timeApp "github.com/robertobadjio/tgtime-aggregator/pkg/time"
-	"github.com/robertobadjio/tgtime-aggregator/pkg/time/endpoints"
-	"github.com/robertobadjio/tgtime-aggregator/pkg/time/transport"
-	"google.golang.org/grpc"
 	"net"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
+
+	"github.com/go-kit/kit/log"
+	kitgrpc "github.com/go-kit/kit/transport/grpc"
+	_ "github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/github"
+	"github.com/oklog/oklog/pkg/group"
+	"github.com/robertobadjio/tgtime-aggregator/internal/aggregator"
+	"github.com/robertobadjio/tgtime-aggregator/internal/config"
+	"github.com/robertobadjio/tgtime-aggregator/pkg/api/time_v1"
+	timeApp "github.com/robertobadjio/tgtime-aggregator/pkg/time"
+	"github.com/robertobadjio/tgtime-aggregator/pkg/time/endpoints"
+	"github.com/robertobadjio/tgtime-aggregator/pkg/time/transport"
 )
 
 var logger log.Logger
 
 func main() {
-	cfg := config.New()
-
-	var (
-		httpAddr = net.JoinHostPort("", cfg.HttpPort)
-		grpcAddr = net.JoinHostPort("", cfg.GrpcPort)
-	)
-
 	logger = log.NewLogfmtLogger(log.NewSyncWriter(os.Stderr))
 	logger = log.With(logger, "ts", log.DefaultTimestampUTC)
 
-	go aggregate()
+	grpcConfig, err := config.NewGRPCConfig()
+	if err != nil {
+		_ = logger.Log("config", "grpc", "error", err.Error())
+		os.Exit(1)
+	}
+
+	httpConfig, err := config.NewHTTPConfig()
+	if err != nil {
+		_ = logger.Log("config", "http", "error", err.Error())
+		os.Exit(1)
+	}
+
+	go aggregator.Aggregate()
 	//go sendPreviousDayInfo(logger)
 
 	var (
@@ -56,28 +56,35 @@ func main() {
 	// API Gateway
 	var g group.Group
 	{
-		httpListener, err := net.Listen("tcp", httpAddr)
+		httpListener, err := net.Listen("tcp", httpConfig.Address())
 		if err != nil {
 			_ = logger.Log("transport", "HTTP", "during", "Listen", "err", err)
 			os.Exit(1)
 		}
 		g.Add(func() error {
-			_ = logger.Log("transport", "HTTP", "addr", httpAddr)
-			return http.Serve(httpListener, httpHandler)
+			_ = logger.Log("transport", "HTTP", "addr", httpConfig.Address())
+			srv := &http.Server{
+				ReadTimeout:  5 * time.Second,
+				WriteTimeout: 10 * time.Second,
+				Handler:      httpHandler,
+			}
+			return srv.Serve(httpListener)
 		}, func(err error) {
+			_ = logger.Log("transport", "HTTP", "during", "Listen", "err", err)
 			_ = httpListener.Close()
 		})
 	}
 	{
-		grpcListener, err := net.Listen("tcp", grpcAddr)
+		grpcListener, err := net.Listen("tcp", grpcConfig.Address())
 		if err != nil {
-			_ = logger.Log("transport", "gRPC", "during", "Listen", "err", err)
+			_ = logger.Log("transport", "GRPC", "during", "Listen", "err", err)
 			os.Exit(1)
 		}
 		g.Add(func() error {
-			_ = logger.Log("transport", "gRPC", "addr", grpcAddr)
+			_ = logger.Log("transport", "GRPC", "addr", grpcConfig.Address())
 			baseServer := grpc.NewServer(grpc.UnaryInterceptor(kitgrpc.Interceptor))
-			aggregatorsvc.RegisterAggregatorServer(baseServer, grpcServer)
+			reflection.Register(baseServer)
+			time_v1.RegisterTimeV1Server(baseServer, grpcServer)
 			return baseServer.Serve(grpcListener)
 		}, func(error) {
 			_ = grpcListener.Close()
@@ -101,6 +108,7 @@ func main() {
 	_ = logger.Log("exit", g.Run())
 }
 
+/*
 func sendPreviousDayInfo(logger log.Logger) {
 	r := tsPgRepo.NewPgRepository(db.GetDB())
 	tsService := implementationTs.NewTimeSummaryService(r, logger)
@@ -115,10 +123,18 @@ func sendPreviousDayInfo(logger log.Logger) {
 
 	k := kafka.NewKafka(cfg.KafkaHost + ":" + cfg.KafkaPort)
 	for _, t := range ts {
+		breaks := make([]*kafka.Break, 0, len(t.Breaks))
+		for _, b := range t.Breaks {
+			breaks = append(breaks, &kafka.Break{
+				SecondsStart: b.SecondsStart,
+				SecondsEnd:   b.SecondsEnd,
+			})
+		}
+
 		m := kafka.PreviousDayInfoMessage{
 			MacAddress:   t.MacAddress,
 			Seconds:      t.Seconds,
-			BreaksJson:   t.BreaksJson,
+			Breaks:       breaks,
 			Date:         t.Date,
 			SecondsStart: t.SecondsStart,
 			SecondsEnd:   t.SecondsEnd,
@@ -126,64 +142,4 @@ func sendPreviousDayInfo(logger log.Logger) {
 		_ = k.Produce(ctx, m, kafka.PreviousDayInfoTopic) // TODO: Handle error
 	}
 }
-
-// TODO: Горизонтальное масштабирование
-func aggregate() {
-	t := time.Now()
-	n := time.Date(t.Year(), t.Month(), t.Day(), 0, 1, 0, 0, t.Location())
-	d := n.Sub(t)
-	if d < 0 {
-		n = n.Add(24 * time.Hour)
-		d = n.Sub(t)
-	}
-	for {
-		time.Sleep(d)
-		d = 24 * time.Hour
-
-		calcTimeSummary()
-	}
-}
-
-func calcTimeSummary() error {
-	tService := implementationT.NewTimeService(tPgRepo.NewPgRepository(db.GetDB()), logger)
-	tsService := implementationTs.NewTimeSummaryService(tsPgRepo.NewPgRepository(db.GetDB()), logger)
-
-	agr := aggregator.NewAggregator(getDate("Europe/Moscow"), tService)
-	ctx := context.TODO()
-	macAddresses, err := tService.GetMacAddresses(ctx, getDate("Europe/Moscow"))
-	if err != nil {
-		return fmt.Errorf("error calc time summary: %w", err)
-	}
-	for _, macAddress := range macAddresses {
-		timeSummary, err := calcTimeSummaryByMacAddress(ctx, agr, macAddress)
-		if err != nil {
-			_ = logger.Log("msg", err.Error())
-		}
-
-		err = tsService.CreateTimeSummary(ctx, timeSummary)
-		if err != nil {
-			return fmt.Errorf("error calc time summary by mac address "+macAddress+": %w", err)
-		}
-	}
-
-	return nil
-}
-
-func calcTimeSummaryByMacAddress(
-	ctx context.Context,
-	agr *aggregator.Aggregator,
-	macAddress string,
-) (*time_summary.TimeSummary, error) {
-	timeSummary, err := agr.AggregateTime(ctx, macAddress)
-	if err != nil {
-		return nil, fmt.Errorf("error calc time summary by mac address "+macAddress+": %w", err)
-
-	}
-
-	return timeSummary, nil
-}
-
-func getDate(location string) time.Time {
-	moscowLocation, _ := time.LoadLocation(location)
-	return time.Now().AddDate(0, 0, -1).In(moscowLocation)
-}
+*/

@@ -2,25 +2,20 @@ package db
 
 import (
 	"database/sql"
-	"fmt"
+	"time"
+
 	_ "github.com/lib/pq"
 	"github.com/robertobadjio/tgtime-aggregator/internal/config"
-	"time"
 )
 
+// GetDB ???
 func GetDB() *sql.DB {
-	cfg := config.New()
-	pgConString := fmt.Sprintf(
-		"host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
-		cfg.DataBaseHost,
-		cfg.DataBasePort,
-		cfg.DataBaseUser,
-		cfg.DataBasePassword,
-		cfg.DataBaseName,
-		cfg.DataBaseSslMode,
-	)
+	pgCfg, err := config.NewPGConfig()
+	if err != nil {
+		panic(err)
+	}
 
-	db, err := sql.Open("postgres", pgConString)
+	db, err := sql.Open("postgres", pgCfg.DSN())
 	if err != nil {
 		panic(err)
 	}

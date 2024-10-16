@@ -2,16 +2,20 @@ package implementation
 
 import (
 	"context"
+	"time"
+
 	"github.com/go-kit/kit/log"
 	time2 "github.com/robertobadjio/tgtime-aggregator/internal/domain/time"
-	"time"
+	"github.com/robertobadjio/tgtime-aggregator/internal/domain/time_summary"
 )
 
+// TimeService Сервис для работы с временем сотрудника
 type TimeService struct {
 	repository time2.Repository
 	logger     log.Logger
 }
 
+// NewTimeService Конструктор сервиса
 func NewTimeService(rep time2.Repository, logger log.Logger) *TimeService {
 	return &TimeService{
 		repository: rep,
@@ -19,24 +23,26 @@ func NewTimeService(rep time2.Repository, logger log.Logger) *TimeService {
 	}
 }
 
+// CreateTime Добавить время пребывания сотрудника на работе / в офисе
 func (s *TimeService) CreateTime(ctx context.Context, t *time2.TimeUser) error {
 	if err := s.repository.CreateTime(ctx, t); err != nil {
-		s.logger.Log("msg", err.Error())
+		_ = s.logger.Log("msg", err.Error())
 		return err // TODO: !
 	}
 
 	return nil
 }
 
+// GetByFilters ???
 func (s *TimeService) GetByFilters(
 	ctx context.Context,
 	macAddress string,
 	date time.Time,
-	routerId int,
+	routerID int,
 ) ([]*time2.TimeUser, error) {
 	secondsStart := getSecondsByBeginDate(date.Format("2006-01-02"))
 	secondsEnd := getSecondsByEndDate(date.Format("2006-01-02"))
-	q := time2.Query{MacAddress: macAddress, SecondsStart: secondsStart, SecondsEnd: secondsEnd, RouterId: routerId}
+	q := time2.Query{MacAddress: macAddress, SecondsStart: secondsStart, SecondsEnd: secondsEnd, RouterID: routerID}
 	users, err := s.repository.GetByFilters(ctx, q)
 	if err != nil {
 		_ = s.logger.Log("msg", err.Error())
@@ -46,6 +52,7 @@ func (s *TimeService) GetByFilters(
 	return users, nil
 }
 
+// GetStartSecondDayByDate ???
 func (s *TimeService) GetStartSecondDayByDate(
 	ctx context.Context,
 	macAddress string,
@@ -57,13 +64,14 @@ func (s *TimeService) GetStartSecondDayByDate(
 
 	seconds, err := s.repository.GetSecondsDayByDate(ctx, q, "ASC")
 	if err != nil {
-		s.logger.Log("msg", err.Error())
+		_ = s.logger.Log("msg", err.Error())
 		return seconds, err
 	}
 
 	return seconds, nil
 }
 
+// GetEndSecondDayByDate ???
 func (s *TimeService) GetEndSecondDayByDate(
 	ctx context.Context,
 	macAddress string,
@@ -75,7 +83,7 @@ func (s *TimeService) GetEndSecondDayByDate(
 
 	seconds, err := s.repository.GetSecondsDayByDate(ctx, q, "DESC")
 	if err != nil {
-		s.logger.Log("msg", err.Error())
+		_ = s.logger.Log("msg", err.Error())
 		return seconds, err
 	}
 
@@ -99,30 +107,34 @@ func (s *TimeService) AggregateDayTotalTime(times []*time2.TimeUser) (int64, err
 	return sum, nil
 }
 
-func (s *TimeService) GetAllBreaksByTimesOld(times []*time2.TimeUser) ([]*time2.Break, error) {
-	breaks := make([]*time2.Break, 0)
+// GetAllBreaksByTimes Подсчет перерывов в работе
+func (s *TimeService) GetAllBreaksByTimes(times []*time2.TimeUser) ([]*time_summary.Break, error) {
+	breaks := make([]*time_summary.Break, 0) // TODO: len
 	for i, t := range times {
 		if i == 0 {
 			continue
 		}
 
-		breakStruct := new(time2.Break)
+		breakStruct := new(time_summary.Break)
 
 		delta := t.Seconds - times[i-1].Seconds
 		if delta <= 33 {
 			continue
-		} else if delta <= (10 * 60) { // TODO: в параметры
-			continue
-		} else {
-			breakStruct.BeginTime = times[i-1].Seconds
-			breakStruct.EndTime = t.Seconds
-			breaks = append(breaks, breakStruct)
 		}
+
+		if delta <= (10 * 60) { // TODO: в параметры
+			continue
+		}
+
+		breakStruct.SecondsStart = times[i-1].Seconds
+		breakStruct.SecondsEnd = t.Seconds
+		breaks = append(breaks, breakStruct)
 	}
 
 	return breaks, nil
 }
 
+// GetMacAddresses Получение mac-адресов сотрудников присутствовавших в офисе за период
 func (s *TimeService) GetMacAddresses(ctx context.Context, date time.Time) ([]string, error) {
 	secondsStart := getSecondsByBeginDate(date.Format("2006-01-02"))
 	secondsEnd := getSecondsByEndDate(date.Format("2006-01-02"))

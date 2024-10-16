@@ -12,7 +12,7 @@ jobs:
     test:
         strategy:
             matrix:
-                go-version: [1.22.x]
+                go-version: [1.23.x]
                 os: [ubuntu-latest]
         runs-on: ${{ matrix.os }}
         steps:
@@ -27,7 +27,6 @@ jobs:
             - name: Add config
               run: |
                 touch ./.env
-                echo ENV="dev" >> .env
                 echo HTTP_PORT="8081" >> .env
                 echo GRPC_PORT="8082" >> .env
                 echo DATABASE_HOST="db" >> .env
@@ -43,10 +42,10 @@ jobs:
                 echo KAFKA_PORT="9092" >> .env
 
             - name: Build containers
-              run: docker compose -f docker-compose.yml -f docker-compose.dev.yml build
+              run: docker compose -f docker-compose.yml build
 
             - name: Start containers
-              run: docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+              run: docker compose -f docker-compose.yml up -d
 
             #- name: Health check
               #run: |

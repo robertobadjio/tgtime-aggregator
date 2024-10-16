@@ -3,18 +3,22 @@ package kafka
 import (
 	"context"
 	"encoding/json"
-	kafkaLib "github.com/segmentio/kafka-go"
 	"time"
+
+	kafkaLib "github.com/segmentio/kafka-go"
 )
 
+// Kafka ???
 type Kafka struct {
 	address string
 }
 
+// NewKafka ???
 func NewKafka(address string) *Kafka {
 	return &Kafka{address: address}
 }
 
+// Produce ???
 func (k Kafka) Produce(ctx context.Context, m PreviousDayInfoMessage, topic string) error {
 	payload, err := json.Marshal(m)
 	if err != nil {
