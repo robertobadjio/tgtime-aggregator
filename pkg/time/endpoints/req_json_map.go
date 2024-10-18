@@ -17,12 +17,12 @@ type CreateTimeResponse struct {
 
 // GetTimeSummaryRequest ???
 type GetTimeSummaryRequest struct {
-	Filters []*time_summary.Filter `json:"filters"`
+	Filters []time_summary.Filter `json:"filters"`
 }
 
 // GetTimeSummaryResponse ???
 type GetTimeSummaryResponse struct {
-	TimeSummary []*time_summary.TimeSummary `json:"time_summary"`
+	TimeSummary []time_summary.TimeSummary `json:"time_summary"`
 }
 
 // ServiceStatusRequest ???

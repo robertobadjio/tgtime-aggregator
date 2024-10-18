@@ -68,16 +68,16 @@ func encodeGRPCCreateResponse(_ context.Context, response interface{}) (interfac
 	return &time_v1.CreateResponse{
 		MacAddress: res.Time.MacAddress,
 		Seconds:    res.Time.Seconds,
-		RouterId:   int64(res.Time.RouterID),
+		RouterId:   res.Time.RouterID,
 	}, nil
 }
 
 func decodeGRPCGetSummaryRequest(_ context.Context, grpcReq interface{}) (interface{}, error) {
 	req := grpcReq.(*time_v1.GetSummaryRequest)
 
-	filters := make([]*time_summary.Filter, 0, len(req.Filters))
+	filters := make([]time_summary.Filter, 0, len(req.Filters))
 	for _, filter := range req.Filters {
-		filters = append(filters, &time_summary.Filter{Key: filter.Key, Value: filter.Value})
+		filters = append(filters, time_summary.Filter{Key: filter.Key, Value: filter.Value})
 	}
 
 	return endpoints.GetTimeSummaryRequest{Filters: filters}, nil

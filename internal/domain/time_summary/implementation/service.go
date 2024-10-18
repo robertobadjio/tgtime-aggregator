@@ -8,7 +8,7 @@ import (
 )
 
 // TimeSummaryService ???
-type TimeSummaryService struct {
+type timeSummaryService struct {
 	repository time_summary.Repository
 	logger     log.Logger
 }
@@ -17,17 +17,17 @@ type TimeSummaryService struct {
 func NewTimeSummaryService(
 	rep time_summary.Repository,
 	logger log.Logger,
-) *TimeSummaryService {
-	return &TimeSummaryService{
+) time_summary.Service {
+	return &timeSummaryService{
 		repository: rep,
 		logger:     logger,
 	}
 }
 
 // CreateTimeSummary ???
-func (s *TimeSummaryService) CreateTimeSummary(
+func (s *timeSummaryService) CreateTimeSummary(
 	ctx context.Context,
-	ts *time_summary.TimeSummary,
+	ts time_summary.TimeSummary,
 ) error {
 	if err := s.repository.CreateTimeSummary(ctx, ts); err != nil {
 		_ = s.logger.Log("msg", err.Error())
@@ -37,12 +37,12 @@ func (s *TimeSummaryService) CreateTimeSummary(
 	return nil
 }
 
-// GetTimeSummary ???
-func (s *TimeSummaryService) GetTimeSummary(
+// GetByFilters ???
+func (s *timeSummaryService) GetByFilters(
 	ctx context.Context,
-	filters []*time_summary.Filter,
-) ([]*time_summary.TimeSummary, error) {
-	ts, err := s.repository.GetTimeSummary(ctx, filters)
+	filters []time_summary.Filter,
+) ([]time_summary.TimeSummary, error) {
+	ts, err := s.repository.GetByFilters(ctx, filters)
 	if err != nil {
 		_ = s.logger.Log("msg", err.Error())
 		return nil, err

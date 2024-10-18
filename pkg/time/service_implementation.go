@@ -48,11 +48,11 @@ func (s *apiService) CreateTime(ctx context.Context, t *time.Time) (*time.Time, 
 // GetTimeSummary ???
 func (s *apiService) GetTimeSummary(
 	ctx context.Context,
-	filters []*time_summary.Filter,
-) ([]*time_summary.TimeSummary, error) {
+	filters []time_summary.Filter,
+) ([]time_summary.TimeSummary, error) {
 	repo := domainTimeSummary.NewPgRepository(db.GetDB())
 	timeSummaryService := timeSummaryimplementation.NewTimeSummaryService(repo, logger)
-	ts, err := timeSummaryService.GetTimeSummary(ctx, filters)
+	ts, err := timeSummaryService.GetByFilters(ctx, filters)
 	if err != nil {
 		_ = logger.Log("msg", err.Error())
 		return nil, fmt.Errorf("error getting time summary")

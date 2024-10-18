@@ -40,9 +40,9 @@ func calcTimeSummary() error {
 	tService := implementationT.NewTimeService(tPgRepo.NewPgRepository(db.GetDB()), logger)
 	tsService := implementationTs.NewTimeSummaryService(tsPgRepo.NewPgRepository(db.GetDB()), logger)
 
-	agr := NewAggregator(getDate("Europe/Moscow"), tService)
+	agr := NewAggregator(getPreviousDate("Europe/Moscow"), tService)
 	ctx := context.TODO()
-	macAddresses, err := tService.GetMacAddresses(ctx, getDate("Europe/Moscow"))
+	macAddresses, err := tService.GetMacAddresses(ctx, getPreviousDate("Europe/Moscow"))
 	if err != nil {
 		return fmt.Errorf("error calc time summary: %w", err)
 	}
@@ -65,17 +65,17 @@ func calcTimeSummaryByMacAddress(
 	ctx context.Context,
 	agr *Aggregator,
 	macAddress string,
-) (*time_summary.TimeSummary, error) {
+) (time_summary.TimeSummary, error) {
 	timeSummary, err := agr.AggregateTime(ctx, macAddress)
 	if err != nil {
-		return nil, fmt.Errorf("error calc time summary by mac address "+macAddress+": %w", err)
+		return time_summary.TimeSummary{}, fmt.Errorf("error calc time summary by mac address "+macAddress+": %w", err)
 
 	}
 
 	return timeSummary, nil
 }
 
-func getDate(location string) time.Time {
+func getPreviousDate(location string) time.Time {
 	moscowLocation, _ := time.LoadLocation(location)
 	return time.Now().AddDate(0, 0, -1).In(moscowLocation)
 }

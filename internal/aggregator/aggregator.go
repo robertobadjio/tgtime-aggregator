@@ -29,31 +29,31 @@ func NewAggregator(
 func (agg Aggregator) AggregateTime(
 	ctx context.Context,
 	macAddress string,
-) (*time_summary.TimeSummary, error) {
+) (time_summary.TimeSummary, error) {
 	times, err := agg.timeService.GetByFilters(ctx, macAddress, agg.date, 0)
 	if err != nil {
-		return nil, err
+		return time_summary.TimeSummary{}, err
 	}
 	seconds, err := agg.timeService.AggregateDayTotalTime(times)
 	if err != nil {
-		return nil, err
+		return time_summary.TimeSummary{}, err
 	}
 
 	breaks, err := agg.timeService.GetAllBreaksByTimes(times)
 	if err != nil {
-		return nil, err
+		return time_summary.TimeSummary{}, err
 	}
 
 	begin, err := agg.timeService.GetStartSecondDayByDate(ctx, macAddress, agg.date)
 	if err != nil {
-		return nil, err
+		return time_summary.TimeSummary{}, err
 	}
 	end, err := agg.timeService.GetEndSecondDayByDate(ctx, macAddress, agg.date)
 	if err != nil {
-		return nil, err
+		return time_summary.TimeSummary{}, err
 	}
 
-	return &time_summary.TimeSummary{
+	return time_summary.TimeSummary{
 		MacAddress:   macAddress,
 		Date:         agg.date.Format("2006-01-02"),
 		Seconds:      seconds,

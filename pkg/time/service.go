@@ -10,6 +10,6 @@ import (
 // Service Интерфейс API
 type Service interface {
 	CreateTime(ctx context.Context, time *time.Time) (*time.Time, error)
-	GetTimeSummary(ctx context.Context, filters []*time_summary.Filter) ([]*time_summary.TimeSummary, error)
+	GetTimeSummary(ctx context.Context, filters []time_summary.Filter) ([]time_summary.TimeSummary, error)
 	ServiceStatus(ctx context.Context) int
 }
