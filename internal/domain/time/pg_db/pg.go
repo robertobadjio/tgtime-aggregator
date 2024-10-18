@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"strings"
 
+	sq "github.com/Masterminds/squirrel"
 	timeDomain "github.com/robertobadjio/tgtime-aggregator/internal/domain/time"
 )
 
@@ -22,15 +23,19 @@ func NewPgRepository(db *sql.DB) *PgTimeRepository {
 
 // CreateTime ???
 func (r *PgTimeRepository) CreateTime(ctx context.Context, t *timeDomain.Time) error {
-	_, err := r.db.ExecContext(
-		ctx,
-		"INSERT INTO time (mac_address, seconds, router_id) VALUES ($1, $2, $3)",
-		t.MacAddress,
-		t.Seconds,
-		t.RouterID,
-	)
+	builderInsert := sq.Insert("time").
+		PlaceholderFormat(sq.Dollar).
+		Columns("mac_address", "seconds", "router_id").
+		Values(t.MacAddress, t.Seconds, t.RouterID)
+
+	query, args, err := builderInsert.ToSql()
 	if err != nil {
-		return err
+		return fmt.Errorf("create time query: %w", err)
+	}
+
+	_, err = r.db.ExecContext(ctx, query, args...)
+	if err != nil {
+		return fmt.Errorf("failed to insert time: %w", err)
 	}
 
 	return nil

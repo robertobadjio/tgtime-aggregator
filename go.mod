@@ -3,10 +3,11 @@ module github.com/robertobadjio/tgtime-aggregator
 go 1.23.0
 
 require (
+	github.com/Masterminds/squirrel v1.5.4
 	github.com/go-kit/kit v0.13.0
 	github.com/golang-migrate/migrate/v4 v4.18.1
 	github.com/gorilla/mux v1.8.1
-	github.com/joho/godotenv v1.5.1
+	github.com/jackc/pgx/v5 v5.5.4
 	github.com/lib/pq v1.10.9
 	github.com/oklog/oklog v0.3.2
 	github.com/segmentio/kafka-go v0.4.47
@@ -22,13 +23,19 @@ require (
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
+	github.com/jackc/pgpassfile v1.0.0 // indirect
+	github.com/jackc/pgservicefile v0.0.0-20221227161230-091c0ba34f0a // indirect
+	github.com/jackc/puddle/v2 v2.2.1 // indirect
 	github.com/klauspost/compress v1.15.11 // indirect
+	github.com/lann/builder v0.0.0-20180802200727-47ae307949d0 // indirect
+	github.com/lann/ps v0.0.0-20150810152359-62de8c46ede0 // indirect
 	github.com/oklog/run v1.1.0 // indirect
 	github.com/pierrec/lz4/v4 v4.1.16 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
 	golang.org/x/crypto v0.27.0 // indirect
 	golang.org/x/net v0.29.0 // indirect
 	golang.org/x/oauth2 v0.18.0 // indirect
+	golang.org/x/sync v0.8.0 // indirect
 	golang.org/x/sys v0.25.0 // indirect
 	golang.org/x/text v0.18.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
