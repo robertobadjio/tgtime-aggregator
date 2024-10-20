@@ -20,7 +20,7 @@ func (r *PgTimeSummaryRepository) CreateTimeSummary(
 
 	builderInsert := sq.Insert("time_summary").
 		PlaceholderFormat(sq.Dollar).
-		Options("IGNORE").
+		//Options("IGNORE").
 		Columns("mac_address", "date", "seconds", "breaks", "seconds_begin", "seconds_end").
 		Values(ts.MacAddress,
 			ts.Date,
