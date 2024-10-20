@@ -54,7 +54,6 @@ func (s *apiService) GetTimeSummary(
 	timeSummaryService := timeSummaryimplementation.NewTimeSummaryService(repo, logger)
 	ts, err := timeSummaryService.GetByFilters(ctx, filters)
 	if err != nil {
-		_ = logger.Log("msg", err.Error())
 		return nil, fmt.Errorf("error getting time summary")
 	}
 

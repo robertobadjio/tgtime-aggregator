@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+
 	sq "github.com/Masterminds/squirrel"
 	"github.com/robertobadjio/tgtime-aggregator/internal/domain/time_summary"
 )
@@ -20,7 +21,7 @@ func (r *PgTimeSummaryRepository) GetByFilters(
 		OrderBy("date ASC")
 
 	for _, filter := range filters {
-		builderSelect.Where(sq.Eq{filter.Key: filter.Value})
+		builderSelect = builderSelect.Where(sq.Eq{filter.Key: filter.Value})
 	}
 
 	query, args, err := builderSelect.ToSql()

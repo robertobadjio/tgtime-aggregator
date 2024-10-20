@@ -1,9 +1,9 @@
 services:
-  app-aggregator:
+  aggregator-app:
     build:
       context: .
       dockerfile: ./docker/app/Dockerfile
-    container_name: tgtime-aggregator
+    container_name: tgtime-aggregator-app
     env_file:
       - .env
     ports:
